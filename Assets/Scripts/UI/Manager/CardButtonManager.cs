@@ -232,30 +232,51 @@ namespace CardGame.UISystem.Controller
         private void ApplyFilters<T>(CardFilterButton<T> changedButton)
         {
             // まず全カードをベースにリスト作成
-            List<CardData> cardsToShow = new List<CardData>(_loader.AllCardData);
+            List<CardData> filteredCards = new List<CardData>(_loader.AllCardData);
 
-            // クラスで絞り込み
-            var activeClasses = ClassButtons.FindAll(b => b.IsActive).ConvertAll(b => b.FilterValue);
-            if (activeClasses.Count > 0)
-                cardsToShow = cardsToShow.FindAll(cd => activeClasses.Contains(cd.ClassType));
+            // --------------------------------------------------
+            // クラスフィルタ適用
+            // --------------------------------------------------
+            var activeClassButtons = ClassButtons.FindAll(b => b.IsActive);
+            if (activeClassButtons.Count > 0)
+            {
+                filteredCards = filteredCards.FindAll(cd => activeClassButtons.Exists(b => cd.ClassType == b.FilterValue));
+            }
 
-            // パックで絞り込み
-            var activePacks = PackButtons.FindAll(b => b.IsActive).ConvertAll(b => b.FilterValue);
-            if (activePacks.Count > 0)
-                cardsToShow = cardsToShow.FindAll(cd => activePacks.Contains(cd.PackNumber));
+            // --------------------------------------------------
+            // パックフィルタ適用
+            // --------------------------------------------------
+            var activePackButtons = PackButtons.FindAll(b => b.IsActive);
+            if (activePackButtons.Count > 0)
+            {
+                filteredCards = filteredCards.FindAll(cd => activePackButtons.Exists(b => cd.PackNumber == b.FilterValue));
+            }
 
-            // レアリティで絞り込み
-            var activeRarities = RarityButtons.FindAll(b => b.IsActive).ConvertAll(b => b.FilterValue);
-            if (activeRarities.Count > 0)
-                cardsToShow = cardsToShow.FindAll(cd => activeRarities.Contains(cd.Rarity));
+            // --------------------------------------------------
+            // レアリティフィルタ適用
+            // --------------------------------------------------
+            var activeRarityButtons = RarityButtons.FindAll(b => b.IsActive);
+            if (activeRarityButtons.Count > 0)
+            {
+                filteredCards = filteredCards.FindAll(cd => activeRarityButtons.Exists(b => cd.Rarity == b.FilterValue));
+            }
 
-            // コストで絞り込み
-            var activeCosts = CostButtons.FindAll(b => b.IsActive).ConvertAll(b => b.FilterValue);
-            if (activeCosts.Count > 0)
-                cardsToShow = cardsToShow.FindAll(cd => activeCosts.Contains(cd.CardCost));
+            // --------------------------------------------------
+            // コストフィルタ適用
+            // --------------------------------------------------
+            var activeCostButtons = CostButtons.FindAll(b => b.IsActive);
+            if (activeCostButtons.Count > 0)
+            {
+                filteredCards = filteredCards.FindAll(cd => activeCostButtons.Exists(b => cd.CardCost == b.FilterValue));
+            }
 
+            // --------------------------------------------------
             // 表示更新
-            _visibilityController.ShowCards(cardsToShow);
+            // --------------------------------------------------
+            _visibilityController.HideAll();
+            _visibilityController.ShowCards(filteredCards);
+
+            OnCardsUpdated?.Invoke();
         }
     }
 }
