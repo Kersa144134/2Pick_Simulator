@@ -12,8 +12,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 3681b0a88746de6478dc0f96bd7d091f, type: 3}
   m_Name: 40221
   m_EditorClassIdentifier: 
-  CardImage: {fileID: 0}
+  CardImage: {fileID: 21300000, guid: a56d47ed4ac99ac4d8d253df6d4a161e, type: 3}
   cardId: 40221
+  cardCost: 0
   cardName: "\u84BC\u6D77\u306E\u88C1\u304D\u30FB\u30CD\u30D7\u30C1\u30E5\u30FC\u30F3"
   cardText: 
   maxCopies: 3

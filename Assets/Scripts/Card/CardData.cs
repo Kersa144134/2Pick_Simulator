@@ -9,7 +9,7 @@
 
 using UnityEngine;
 
-namespace CardGame.Data
+namespace CardGame.CardSystem.Data
 {
     /// <summary>
     /// カード1枚分の基本情報を定義する ScriptableObject クラス
@@ -59,8 +59,6 @@ namespace CardGame.Data
         /// カード画像（立ち絵やアートなど）  
         /// UI表示に直接使用可能なSpriteを保持する
         /// </summary>
-        [HideInInspector]
-        [SerializeField]
         public Sprite CardImage = null;
 
         /// <summary>
@@ -153,7 +151,7 @@ namespace CardGame.Data
         }
 
         // ======================================================
-        // メソッド
+        // パブリックメソッド
         // ======================================================
 
         /// <summary>

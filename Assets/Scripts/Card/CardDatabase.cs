@@ -8,10 +8,8 @@
 // ======================================================
 
 using System.Collections.Generic;
-using UnityEngine;
-using CardGame.Data;
 
-namespace CardGame.Database
+namespace CardGame.CardSystem.Data
 {
     /// <summary>
     /// ゲーム中にカードの最大編成枚数および画像を動的に管理するクラス  
@@ -22,12 +20,6 @@ namespace CardGame.Database
         // ======================================================
         // 定数
         // ======================================================
-
-        /// <summary>カード画像のルートディレクトリ</summary>
-        private const string ImageRootPath = "Images/Cards/";
-
-        /// <summary>カード画像のファイル名先頭の文字数（5桁ID）</summary>
-        private const int CardIdLength = 5;
 
         /// <summary>最大編成枚数のデフォルト値</summary>
         private const int DefaultMaxCopies = 3;
@@ -41,9 +33,6 @@ namespace CardGame.Database
 
         /// <summary>カードごとの現在最大枚数テーブル（Key: カードID）</summary>
         private Dictionary<int, int> maxCopiesTable = new Dictionary<int, int>();
-
-        /// <summary>ロード済み画像のキャッシュ（Key: ファイル名）</summary>
-        private Dictionary<string, Sprite> imageCache = new Dictionary<string, Sprite>();
 
         // ======================================================
         // コンストラクタ
@@ -65,8 +54,12 @@ namespace CardGame.Database
         }
 
         // ======================================================
-        // メソッド（基本操作）
+        // パブリックメソッド
         // ======================================================
+
+        // --------------------------------------------------
+        // 基本操作
+        // --------------------------------------------------
 
         /// <summary>
         /// 指定IDの最大編成枚数を取得する
@@ -105,9 +98,9 @@ namespace CardGame.Database
             }
         }
 
-        // ======================================================
-        // メソッド（グループ操作）
-        // ======================================================
+        // --------------------------------------------------
+        // グループ操作
+        // --------------------------------------------------
 
         /// <summary>
         /// 特定クラスのカード全ての最大枚数を一括変更する
@@ -151,9 +144,9 @@ namespace CardGame.Database
             }
         }
 
-        // ======================================================
-        // メソッド（一括初期化）
-        // ======================================================
+        // --------------------------------------------------
+        // 一括初期化
+        // --------------------------------------------------
 
         /// <summary>
         /// 全カードをデフォルト枚数にリセットする
@@ -174,22 +167,6 @@ namespace CardGame.Database
             foreach (CardData data in cardList)
             {
                 SetMaxCopies(data.CardId, 0);
-            }
-        }
-
-        // ======================================================
-        // メソッド（デバッグ）
-        // ======================================================
-
-        /// <summary>
-        /// 現在のカード設定をコンソール出力する
-        /// </summary>
-        public void PrintAllCardLimits()
-        {
-            foreach (CardData data in cardList)
-            {
-                int current = GetMaxCopies(data.CardId);
-                Debug.Log($"[{data.CardName}] ({data.ClassType}) => Max: {current}");
             }
         }
     }

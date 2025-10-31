@@ -10,9 +10,9 @@
 using UnityEngine;
 using UnityEditor;
 using System.IO;
-using CardGame.Data;
+using CardGame.CardSystem.Data;
 
-namespace CardGame.Editor
+namespace CardGame.CardSystem.Utility
 {
     /// <summary>
     /// Editor 用にカードデータ ScriptableObject を自動生成・画像割り当てするクラス
@@ -39,8 +39,12 @@ namespace CardGame.Editor
         private const int DefaultMaxCopies = 3;
 
         // ======================================================
-        // メニューコマンド（新規作成＋画像割り当て）
+        // メニューコマンド
         // ======================================================
+
+        // --------------------------------------------------
+        // 新規作成＋画像割り当て制御
+        // --------------------------------------------------
 
         [MenuItem("Tools/Card/Create All CardData With Images")]
         private static void GenerateAllCardDataWithImages()
@@ -48,9 +52,9 @@ namespace CardGame.Editor
             ProcessAllCardFiles(isUpdateOnly: false);
         }
 
-        // ======================================================
-        // メニューコマンド（画像のみ上書き）
-        // ======================================================
+        // --------------------------------------------------
+        // 画像上書き制御
+        // --------------------------------------------------
 
         [MenuItem("Tools/Card/Update All Card Images Only")]
         private static void UpdateAllCardImages()
@@ -59,7 +63,7 @@ namespace CardGame.Editor
         }
 
         // ======================================================
-        // 内部処理
+        // プライベートメソッド
         // ======================================================
 
         /// <summary>
@@ -191,9 +195,9 @@ namespace CardGame.Editor
             Debug.Log("[CardDataGenerator] 処理完了");
         }
 
-        // ======================================================
-        // 画像割り当て共通メソッド
-        // ======================================================
+        // --------------------------------------------------
+        // 画像上書き制御
+        // --------------------------------------------------
 
         /// <summary>
         /// CardData に画像を Resources からロードして割り当て
@@ -205,7 +209,12 @@ namespace CardGame.Editor
 
             if (sprite != null)
             {
-                cardSO.CardImage = sprite; // CardImage 大文字
+                cardSO.CardImage = sprite;
+
+                // 永続化処理
+                EditorUtility.SetDirty(cardSO);
+                AssetDatabase.SaveAssets();
+
                 Debug.Log($"[CardDataGenerator] Image Applied: {cardName} ({cardId:D5})");
             }
             else
