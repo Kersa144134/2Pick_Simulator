@@ -3,8 +3,8 @@
 // 作成者     : 高橋一翔
 // 作成日時   : 2025-10-30
 // 更新日時   : 2025-10-30
-// 概要       : カードの最大編成枚数を管理するクラス
-//              個別カードまたはクラス・パック・レアリティ単位で設定変更が可能
+// 概要       : カードの最大編成枚数および画像を管理するクラス
+//              各カードのクラス・パック・レアリティごとの制御に対応
 // ======================================================
 
 using System.Collections.Generic;
@@ -14,46 +14,50 @@ using CardGame.Data;
 namespace CardGame.Database
 {
     /// <summary>
-    /// ゲーム中にカードの最大編成枚数を管理・変更するクラス  
-    /// ScriptableObjectではなく、動的に管理されるランタイムデータ
+    /// ゲーム中にカードの最大編成枚数および画像を動的に管理するクラス  
+    /// ScriptableObjectを使用せず、ランタイムで生成・制御される
     /// </summary>
     public class CardDatabase
     {
         // ======================================================
+        // 定数
+        // ======================================================
+
+        /// <summary>カード画像のルートディレクトリ</summary>
+        private const string ImageRootPath = "Images/Cards/";
+
+        /// <summary>カード画像のファイル名先頭の文字数（5桁ID）</summary>
+        private const int CardIdLength = 5;
+
+        /// <summary>最大編成枚数のデフォルト値</summary>
+        private const int DefaultMaxCopies = 3;
+
+        // ======================================================
         // フィールド
         // ======================================================
 
-        /// <summary>
-        /// 登録されたカードデータの一覧  
-        /// 通常はScriptableObjectからロードされて保持される
-        /// </summary>
+        /// <summary>全カードデータのリスト</summary>
         private List<CardData> cardList = new List<CardData>();
 
-        /// <summary>
-        /// 各カードの現在設定されている最大枚数を動的に保持する辞書  
-        /// Key: カードID, Value: 最大枚数
-        /// </summary>
+        /// <summary>カードごとの現在最大枚数テーブル（Key: カードID）</summary>
         private Dictionary<int, int> maxCopiesTable = new Dictionary<int, int>();
 
-        /// <summary>
-        /// デフォルトの最大枚数（未設定時に使用される基準値）  
-        /// 通常は3枚
-        /// </summary>
-        private const int DefaultMaxCopies = 3;
+        /// <summary>ロード済み画像のキャッシュ（Key: ファイル名）</summary>
+        private Dictionary<string, Sprite> imageCache = new Dictionary<string, Sprite>();
 
         // ======================================================
         // コンストラクタ
         // ======================================================
 
         /// <summary>
-        /// カードリストを初期化して最大枚数テーブルを生成
+        /// カードリストを初期化して最大枚数テーブルを生成する
         /// </summary>
         public CardDatabase(List<CardData> sourceList)
         {
-            // 渡されたカードデータ群を内部リストに保持
+            // 渡されたデータをコピー
             cardList = new List<CardData>(sourceList);
 
-            // 各カードごとに初期最大枚数を登録
+            // 各カードに初期値を設定
             foreach (CardData data in cardList)
             {
                 maxCopiesTable[data.CardId] = data.MaxCopies;
@@ -65,11 +69,10 @@ namespace CardGame.Database
         // ======================================================
 
         /// <summary>
-        /// 指定したカードIDの現在設定されている最大枚数を取得
+        /// 指定IDの最大編成枚数を取得する
         /// </summary>
         public int GetMaxCopies(int cardId)
         {
-            // 未登録カードの場合はデフォルト値を返す
             if (!maxCopiesTable.ContainsKey(cardId))
             {
                 return DefaultMaxCopies;
@@ -79,11 +82,10 @@ namespace CardGame.Database
         }
 
         /// <summary>
-        /// 指定カードの最大枚数を直接設定（UI操作などで使用）
+        /// 指定IDの最大編成枚数を設定する
         /// </summary>
         public void SetMaxCopies(int cardId, int newValue)
         {
-            // 値が1〜3の範囲外なら制限
             if (newValue < 0)
             {
                 newValue = 0;
@@ -93,7 +95,6 @@ namespace CardGame.Database
                 newValue = 3;
             }
 
-            // 登録済みなら更新、未登録なら追加
             if (maxCopiesTable.ContainsKey(cardId))
             {
                 maxCopiesTable[cardId] = newValue;
@@ -109,8 +110,7 @@ namespace CardGame.Database
         // ======================================================
 
         /// <summary>
-        /// 特定クラスのカードすべてを指定値に一括変更  
-        /// 例: ロイヤル以外を0枚にする等
+        /// 特定クラスのカード全ての最大枚数を一括変更する
         /// </summary>
         public void SetMaxCopiesByClass(CardData.CardClass targetClass, int newValue)
         {
@@ -124,7 +124,7 @@ namespace CardGame.Database
         }
 
         /// <summary>
-        /// 特定パックのカードすべてを指定値に一括変更
+        /// 特定パックのカード全ての最大枚数を一括変更する
         /// </summary>
         public void SetMaxCopiesByPack(int packNumber, int newValue)
         {
@@ -138,7 +138,7 @@ namespace CardGame.Database
         }
 
         /// <summary>
-        /// 特定レアリティのカードすべてを指定値に一括変更
+        /// 特定レアリティのカード全ての最大枚数を一括変更する
         /// </summary>
         public void SetMaxCopiesByRarity(CardData.CardRarity rarity, int newValue)
         {
@@ -156,7 +156,7 @@ namespace CardGame.Database
         // ======================================================
 
         /// <summary>
-        /// すべてのカードを「デフォルトの最大枚数」に戻す
+        /// 全カードをデフォルト枚数にリセットする
         /// </summary>
         public void ResetAllToDefault()
         {
@@ -167,7 +167,7 @@ namespace CardGame.Database
         }
 
         /// <summary>
-        /// すべてのカードを「使用不可（0枚）」に設定する
+        /// 全カードを使用不可（0枚）に設定する
         /// </summary>
         public void SetAllToZero()
         {
@@ -182,7 +182,7 @@ namespace CardGame.Database
         // ======================================================
 
         /// <summary>
-        /// 現在のカード枚数設定をコンソール出力
+        /// 現在のカード設定をコンソール出力する
         /// </summary>
         public void PrintAllCardLimits()
         {

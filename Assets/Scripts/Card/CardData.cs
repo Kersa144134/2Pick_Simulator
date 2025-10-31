@@ -59,8 +59,9 @@ namespace CardGame.Data
         /// カード画像（立ち絵やアートなど）  
         /// UI表示に直接使用可能なSpriteを保持する
         /// </summary>
+        [HideInInspector]
         [SerializeField]
-        public Sprite cardImage = null;
+        public Sprite CardImage = null;
 
         /// <summary>
         /// カードを一意に識別する5桁整数ID
@@ -68,6 +69,12 @@ namespace CardGame.Data
         /// </summary>
         [SerializeField]
         private int cardId = 0;
+
+        /// <summary>
+        /// カードのコスト
+        /// </summary>
+        [SerializeField, Min(0)]
+        private int cardCost = 0;
 
         /// <summary>
         /// カードの表示名
@@ -95,6 +102,12 @@ namespace CardGame.Data
         public int CardId
         {
             get { return cardId; }
+        }
+
+        /// <summary>カードコストを取得</summary>
+        public int CardCost
+        {
+            get { return cardCost; }
         }
 
         /// <summary>カード名を取得</summary>
