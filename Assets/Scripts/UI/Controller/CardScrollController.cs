@@ -88,8 +88,7 @@ namespace CardGame.UISystem.Controller
             // 移動量算出と適用
             // --------------------------------------------------
             Vector2 anchoredPos = targetRect.anchoredPosition;
-            // ホイール方向反転
-            anchoredPos.x += scrollInput * settings.moveSpeed * -1f;
+            anchoredPos.x += scrollInput * settings.moveSpeed;
 
             // 範囲内にClamp
             anchoredPos.x = Mathf.Clamp(anchoredPos.x, settings.scrollRange.x, settings.scrollRange.y);
