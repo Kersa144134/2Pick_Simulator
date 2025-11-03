@@ -7,12 +7,13 @@
 //             クラスボタン押下で所属カードの表示/非表示を一括切替可能
 // ======================================================
 
-using System.Collections.Generic;
-using UnityEngine;
-using UnityEngine.UI;
 using CardGame.CardSystem.Data;
 using CardGame.CardSystem.Utility;
 using CardGame.UISystem.Controller;
+using CardGame.UISystem.Initializer;
+using System.Collections.Generic;
+using UnityEngine;
+using UnityEngine.UI;
 using static CardGame.CardSystem.Data.CardData;
 
 namespace CardGame.UISystem.Manager
@@ -73,8 +74,17 @@ namespace CardGame.UISystem.Manager
         /// <summary>カードフィルタボタンの状態管理と押下イベントを統合したクラス</summary>
         private CardButtonManager _buttonManager;
 
+        /// <summary>カードデータベース（最大枚数管理用）</summary>
+        private CardDatabase _cardDatabase;
+        
         /// <summary>CardDataをロード、キャッシュするクラス</summary>
-        private CardDataLoader _loader;
+        private CardDataLoader _loader = new CardDataLoader();
+
+        /// <summary></summary>
+        private CardFilterGroupController _filterGroupController;
+
+        /// <summary></summary>
+        private CardDisplayRefresher _displayRefresher;
 
         /// <summary>スクロール制御用コントローラ（RectTransform移動版）</summary>
         private CardScrollController _scrollController;
@@ -87,18 +97,41 @@ namespace CardGame.UISystem.Manager
         // ======================================================
 
         [Header("スクロール設定")]
-        /// <summary>カード画像のスクロール速度およびスクロール範囲設定</summary>
-        [SerializeField]
-        private CardScrollSettings scrollSettings;
+        [SerializeField, Min(1f)]
+        private float scrollMoveSpeed = 1000f;
 
         [Header("表示設定")]
         /// <summary>カードを横に並べる際の間隔（px）</summary>
         [SerializeField, Min(0f)]
         private float horizontalSpacing = 100f;
 
+        [SerializeField]
+        /// <summary>表示中カードのRectTransform</summary>
+        private RectTransform _visibleParent;
+
+        [SerializeField]
+        /// <summary>非表示カードの一時待避先RectTransform</summary>
+        private RectTransform _hiddenParent;
+
         /// <summary>カード表示用のPrefab（Image付きUIオブジェクト）</summary>
         [SerializeField]
         private GameObject cardPrefab = null;
+
+        [Header("フィルターボタングループ")]
+        /// <summary>クラスボタン群の親</summary>
+        [SerializeField] private GameObject classButtonGroup;
+
+        /// <summary>パックボタン群の親</summary>
+        [SerializeField] private GameObject packButtonGroup;
+
+        /// <summary>レアリティボタン群の親</summary>
+        [SerializeField] private GameObject rarityButtonGroup;
+
+        /// <summary>コストボタン群の親</summary>
+        [SerializeField] private GameObject costButtonGroup;
+
+        /// <summary>フィルターモード時に表示するパネル</summary>
+        [SerializeField] private GameObject filterPanel;
 
         [Header("クラスボタン設定")]
         /// <summary>各カードクラス用ボタンと初期表示状態を設定する配列</summary>
@@ -124,14 +157,14 @@ namespace CardGame.UISystem.Manager
         // フィールド
         // ======================================================
 
-        /// <summary>Canvas上に生成されたカードオブジェクトのリスト</summary>
-        private readonly List<GameObject> _displayedCards = new List<GameObject>();
+        /// <summary>生成済みのカード表示コンポーネントリスト</summary>
+        private readonly List<CardDisplay> _cardDisplays = new List<CardDisplay>();
 
         /// <summary>現在表示対象となるCardDataリスト</summary>
         private List<CardData> _visibleCardData = new List<CardData>();
 
-        /// <summary>カード生成親RectTransform</summary>
-        private RectTransform _parentTransform;
+        /// <summary>すべてのフィルターグループをまとめた一括制御用配列</summary>
+        private GameObject[] _filterGroups;
 
         // ======================================================
         // Unityイベント
@@ -139,27 +172,20 @@ namespace CardGame.UISystem.Manager
 
         private void Start()
         {
-            // RectTransform取得
-            _parentTransform = GetComponent<RectTransform>();
+            InitializeCardData();
+            InitializeButtonManager();
+            InitializeFilterGroups();
+            GenerateCardObjects();
 
-            // ScrollController初期化（RectTransform直接移動版）
-            _scrollController = new CardScrollController(_parentTransform, scrollSettings);
+            _scrollController = new CardScrollController(_visibleParent, scrollMoveSpeed);
+            _displayRefresher = new CardDisplayRefresher(
+                _visibleParent,
+                _hiddenParent,
+                horizontalSpacing,
+                _scrollController,
+                _cardDisplays
+            );
 
-            // CardDataロード
-            _loader = new CardDataLoader();
-            _loader.LoadAllCardData();
-
-            // 表示管理初期化
-            _visibilityController = new CardVisibilityController(_loader.AllCardData);
-            _visibleCardData = _visibilityController.GetVisibleCards();
-
-            // CardButtonManager初期化
-            _buttonManager = new CardButtonManager(_visibilityController, _loader);
-
-            // ボタン設定
-            SetupAllButtons();
-
-            // カード生成
             RefreshDisplay();
         }
 
@@ -172,16 +198,27 @@ namespace CardGame.UISystem.Manager
         // ボタン初期化処理
         // ======================================================
 
-        /// <summary>すべてのボタンを初期化してCardButtonManagerに登録</summary>
+        /// <summary>
+        /// すべてのボタンを初期化してCardButtonManagerに登録する  
+        /// 各ボタンの押下時に表示更新を行う
+        /// </summary>
         private void SetupAllButtons()
         {
-            SetupClassButtons();
-            SetupPackButtons();
-            SetupRarityButtons();
-            SetupCostButtons();
+            // 初期化ヘルパー生成
+            CardButtonInitializer initializer = new CardButtonInitializer(
+                _buttonManager,
+                _visibilityController,
+                () =>
+                {
+                    _visibleCardData = _visibilityController.GetVisibleCards();
+                    RefreshDisplay();
+                }
+            );
 
-            // CardButtonManagerの更新イベントにCanvas更新処理を登録
-            // これでどのフィルターでも変更後にRefreshDisplayが呼ばれる
+            // 各ボタン群の初期化を一括実行
+            initializer.InitializeAll(classButtons, packButtons, rarityButtons, costButtons);
+
+            // 外部からの更新通知イベントに対応
             _buttonManager.OnCardsUpdated += () =>
             {
                 _visibleCardData = _visibilityController.GetVisibleCards();
@@ -189,93 +226,54 @@ namespace CardGame.UISystem.Manager
             };
         }
 
-        /// <summary>クラスボタン初期化</summary>
-        private void SetupClassButtons()
+        // ======================================================
+        // 初期化系メソッド群
+        // ======================================================
+
+        /// <summary>カードデータのロードと初期化を行う</summary>
+        private void InitializeCardData()
         {
-            if (classButtons == null || classButtons.Length == 0)
-            {
-                Debug.LogWarning("classButtons が未設定です。Inspectorで割り当ててください。");
-                return;
-            }
+            _loader.LoadAllCardData();
 
-            foreach (var cb in classButtons)
-            {
-                if (cb.Button != null)
-                {
-                    var classBtnInstance = new CardClassButton(cb.Button, cb.ColorSettings, cb.Class, cb.DefaultOn);
-                    _buttonManager.RegisterClassButton(classBtnInstance);
+            _cardDatabase = new CardDatabase(_loader.AllCardData);
+            _visibilityController = new CardVisibilityController(_loader.AllCardData);
+            _visibleCardData = _visibilityController.GetVisibleCards();
+        }
 
-                    // ボタンクリック時に表示を即更新
-                    cb.Button.onClick.AddListener(() =>
-                    {
-                        _visibleCardData = _visibilityController.GetVisibleCards();
-                        RefreshDisplay();
-                    });
-                }
+        /// <summary>ボタン管理クラスとイベントを初期化する</summary>
+        private void InitializeButtonManager()
+        {
+            _buttonManager = new CardButtonManager(_visibilityController, _loader);
+            SetupAllButtons();
+        }
+
+        /// <summary>カードPrefabを生成し、CardDisplayを初期化する</summary>
+        private void GenerateCardObjects()
+        {
+            for (int i = 0; i < _loader.AllCardData.Count; i++)
+            {
+                CardData data = _loader.AllCardData[i];
+                GameObject cardObject = Instantiate(cardPrefab, _hiddenParent);
+                CardDisplay display = cardObject.GetComponent<CardDisplay>();
+                display.Initialize(data, _cardDatabase);
+                _cardDisplays.Add(display);
             }
         }
 
-        /// <summary>パックボタン初期化</summary>
-        private void SetupPackButtons()
+        /// <summary>フィルタグループ配列を構築し、初期非表示にする</summary>
+        private void InitializeFilterGroups()
         {
-            if (packButtons == null) return;
-
-            foreach (var pb in packButtons)
+            _filterGroups = new GameObject[]
             {
-                if (pb.Button != null)
-                {
-                    var btn = new CardPackButton(pb.Button, pb.ColorSettings, pb.PackId, pb.DefaultOn);
-                    _buttonManager.RegisterPackButton(btn);
+                classButtonGroup,
+                packButtonGroup,
+                rarityButtonGroup,
+                costButtonGroup,
+                filterPanel
+            };
 
-                    pb.Button.onClick.AddListener(() =>
-                    {
-                        _visibleCardData = _visibilityController.GetVisibleCards();
-                        RefreshDisplay();
-                    });
-                }
-            }
-        }
-
-        /// <summary>レアリティボタン初期化</summary>
-        private void SetupRarityButtons()
-        {
-            if (rarityButtons == null) return;
-
-            foreach (var rb in rarityButtons)
-            {
-                if (rb.Button != null)
-                {
-                    var btn = new CardRarityButton(rb.Button, rb.ColorSettings, rb.Rarity, rb.DefaultOn);
-                    _buttonManager.RegisterRarityButton(btn);
-
-                    rb.Button.onClick.AddListener(() =>
-                    {
-                        _visibleCardData = _visibilityController.GetVisibleCards();
-                        RefreshDisplay();
-                    });
-                }
-            }
-        }
-
-        /// <summary>コストボタン初期化</summary>
-        private void SetupCostButtons()
-        {
-            if (costButtons == null) return;
-
-            foreach (var cb in costButtons)
-            {
-                if (cb.Button != null)
-                {
-                    var btn = new CardCostButton(cb.Button, cb.ColorSettings, cb.Cost, cb.DefaultOn);
-                    _buttonManager.RegisterCostButton(btn);
-
-                    cb.Button.onClick.AddListener(() =>
-                    {
-                        _visibleCardData = _visibilityController.GetVisibleCards();
-                        RefreshDisplay();
-                    });
-                }
-            }
+            _filterGroupController = new CardFilterGroupController(_filterGroups);
+            _filterGroupController.SetAllGroupsActive(false);
         }
 
         // ======================================================
@@ -283,42 +281,29 @@ namespace CardGame.UISystem.Manager
         // ======================================================
 
         /// <summary>
-        /// 現在表示対象のCardDataリストに基づき、カードを生成・配置
-        /// ScrollRect非使用、RectTransform直接移動で配置
+        /// 現在の可視カードデータに基づいてUI表示を再構成する
         /// </summary>
-        public void RefreshDisplay()
+        private void RefreshDisplay()
         {
-            // 既存カード削除
-            foreach (GameObject cardGO in _displayedCards)
+            _displayRefresher.Refresh(_visibleCardData);
+        }
+
+        // ======================================================
+        // フィルターボタンパネル制御
+        // ======================================================
+
+        /// <summary>
+        /// フィルター群全体の表示/非表示をトグル切替する  
+        /// オプションボタンから呼び出される
+        /// </summary>
+        public void ToggleAllOptionButtons()
+        {
+            if (_filterGroupController == null)
             {
-                GameObject.Destroy(cardGO);
-            }
-            _displayedCards.Clear();
-
-            // カード生成
-            for (int i = 0; i < _visibleCardData.Count; i++)
-            {
-                CardData cardData = _visibleCardData[i];
-
-                if (cardData.CardImage == null || cardPrefab == null) continue;
-
-                GameObject cardGO = GameObject.Instantiate(cardPrefab, _parentTransform);
-
-                Image img = cardGO.GetComponent<Image>();
-                if (img != null)
-                {
-                    img.sprite = cardData.CardImage;
-                    img.preserveAspect = true;
-                }
-
-                RectTransform rt = cardGO.GetComponent<RectTransform>();
-                if (rt != null) rt.anchoredPosition = new Vector2(i * horizontalSpacing, 0f);
-
-                _displayedCards.Add(cardGO);
+                return;
             }
 
-            // スクロール位置リセット
-            _scrollController?.ResetScrollPosition();
+            _filterGroupController.ToggleAllGroups();
         }
     }
 }

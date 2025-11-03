@@ -40,7 +40,7 @@ namespace CardGame.UISystem.Controller
         /// すべてのカードを最初は表示対象として登録
         /// </summary>
         /// <param name="allCards">ロード済みの全CardData</param>
-        public CardVisibilityController(IEnumerable<CardData> allCards)
+        public CardVisibilityController(List<CardData> allCards)
         {
             foreach (var card in allCards)
             {
@@ -116,18 +116,6 @@ namespace CardGame.UISystem.Controller
         // --------------------------------------------------
         // リセット制御
         // --------------------------------------------------
-
-        /// <summary>
-        /// すべてのカードを表示対象に戻す  
-        /// （フィルタ解除などの一括操作に使用）
-        /// </summary>
-        public void ShowAll()
-        {
-            _visibleCardData.AddRange(_hiddenCardData);
-            _hiddenCardData.Clear();
-
-            _visibleCardData.Sort((a, b) => a.CardId.CompareTo(b.CardId));
-        }
 
         /// <summary>
         /// すべてのカードを非表示にする

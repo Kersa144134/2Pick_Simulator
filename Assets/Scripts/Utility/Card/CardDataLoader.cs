@@ -26,8 +26,12 @@ namespace CardGame.CardSystem.Utility
         /// <summary>ロード済みのCardDataリスト</summary>
         private readonly List<CardData> _allCardData = new List<CardData>();
 
-        /// <summary>読み取り専用で外部参照可能なCardDataリスト</summary>
-        public IReadOnlyList<CardData> AllCardData => _allCardData;
+        // ======================================================
+        // プロパティ
+        // ======================================================
+
+        /// <summary>ロード済みのCardDataリスト</summary>
+        public List<CardData> AllCardData => _allCardData;
 
         // ======================================================
         // パブリックメソッド

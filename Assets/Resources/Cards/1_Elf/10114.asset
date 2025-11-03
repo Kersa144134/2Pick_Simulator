@@ -14,7 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   CardImage: {fileID: 21300000, guid: 763c698aa15b14e4bbd447dd08ff5989, type: 3}
   cardId: 10114
-  cardCost: 0
+  cardCost: 7
   cardName: "\u30D5\u30ED\u30B9\u30C8\u30AF\u30EA\u30B9\u30BF\u30EA\u30A2\u30FB\u30A8\u30EA\u30F3"
   cardText: 
   maxCopies: 3
