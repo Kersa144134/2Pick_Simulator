@@ -7,13 +7,14 @@
 //             クラスボタン押下で所属カードの表示/非表示を一括切替可能
 // ======================================================
 
-using CardGame.CardSystem.Data;
-using CardGame.CardSystem.Utility;
-using CardGame.UISystem.Controller;
-using CardGame.UISystem.Initializer;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
+using CardGame.CardSystem.Data;
+using CardGame.CardSystem.Manager;
+using CardGame.CardSystem.Utility;
+using CardGame.UISystem.Controller;
+using CardGame.UISystem.Initializer;
 using static CardGame.CardSystem.Data.CardData;
 
 namespace CardGame.UISystem.Manager
@@ -189,6 +190,11 @@ namespace CardGame.UISystem.Manager
             RefreshDisplay();
         }
 
+        private void OnEnable()
+        {
+            _filterGroupController?.SetAllGroupsActive(false);
+        }
+
         private void Update()
         {
             _scrollController?.Update();
@@ -233,9 +239,18 @@ namespace CardGame.UISystem.Manager
         /// <summary>カードデータのロードと初期化を行う</summary>
         private void InitializeCardData()
         {
-            _loader.LoadAllCardData();
+            // シングルトンからデータ取得
+            CardDatabaseManager manager = CardDatabaseManager.Instance;
+            if (manager == null)
+            {
+                Debug.LogError("CardDatabaseManagerが存在しません。");
+                return;
+            }
 
-            _cardDatabase = new CardDatabase(_loader.AllCardData);
+            _cardDatabase = manager.GetCardDatabase();
+            CardDataLoader loader = manager.GetCardDataLoader();
+
+            _loader = loader;
             _visibilityController = new CardVisibilityController(_loader.AllCardData);
             _visibleCardData = _visibilityController.GetVisibleCards();
         }
@@ -273,7 +288,6 @@ namespace CardGame.UISystem.Manager
             };
 
             _filterGroupController = new CardFilterGroupController(_filterGroups);
-            _filterGroupController.SetAllGroupsActive(false);
         }
 
         // ======================================================

@@ -35,6 +35,16 @@ namespace CardGame.CardSystem.Data
         private Dictionary<int, int> maxCopiesTable = new Dictionary<int, int>();
 
         // ======================================================
+        // プロパティ
+        // ======================================================
+
+        /// <summary>すべてのカードデータリストを取得（読み取り専用）</summary>
+        public List<CardData> AllCards
+        {
+            get { return new List<CardData>(cardList); }
+        }
+
+        // ======================================================
         // コンストラクタ
         // ======================================================
 
