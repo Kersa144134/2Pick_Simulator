@@ -7,11 +7,12 @@
 //             クラスボタン押下で確認パネルを表示し、選択されたクラスをPickSceneに渡す
 // ======================================================
 
-using System;
-using UnityEngine;
-using UnityEngine.UI;
 using CardGame.CardSystem.Data;
 using CardGame.CardSystem.Manager;
+using System;
+using System.Collections.Generic;
+using UnityEngine;
+using UnityEngine.UI;
 
 namespace CardGame.GameSystem.Manager
 {
@@ -62,6 +63,23 @@ namespace CardGame.GameSystem.Manager
         /// <summary>選択中のクラスID</summary>
         private int _selectedClassIndex = -1;
 
+        // ======================================================
+        // 辞書
+        // ======================================================
+
+        /// <summary>クラス列挙値からカタカナ名への変換辞書</summary>
+        private readonly Dictionary<CardData.CardClass, string> ClassNameMap = new Dictionary<CardData.CardClass, string>()
+        {
+            { CardData.CardClass.Neutral, "ニュートラル" },
+            { CardData.CardClass.Elf, "エルフ" },
+            { CardData.CardClass.Royal, "ロイヤル" },
+            { CardData.CardClass.Witch, "ウィッチ" },
+            { CardData.CardClass.Dragon, "ドラゴン" },
+            { CardData.CardClass.Nightmare, "ナイトメア" },
+            { CardData.CardClass.Bishop, "ビショップ" },
+            { CardData.CardClass.Nemesis, "ネメシス" }
+        };
+        
         // ======================================================
         // Unityイベント
         // ======================================================
@@ -129,10 +147,12 @@ namespace CardGame.GameSystem.Manager
                 Debug.LogError($"不正なクラスインデックス: {classIndex}");
                 return;
             }
+            
+            string className = ClassNameMap.ContainsKey(classButtonDataArray[classIndex].Class)
+                ? ClassNameMap[classButtonDataArray[classIndex].Class]
+                : "不明";
 
-            Debug.Log($"ボタン '{classButtonDataArray[classIndex].Button.name}' が押されました（クラス: {classButtonDataArray[classIndex].Class}）");
-
-            confirmPanel.Show($"クラス {classIndex + 1} を選択しますか？");
+            confirmPanel.Show($"{className} を選択しますか？");
         }
 
         /// <summary>
@@ -141,9 +161,6 @@ namespace CardGame.GameSystem.Manager
         /// </summary>
         private void OnConfirmOk()
         {
-            // TODO: 選択クラス情報をPickSceneに渡して遷移
-            Debug.Log($"選択クラス: {_selectedClassIndex} でPickSceneへ遷移");
-
             confirmPanel.Hide();
         }
 

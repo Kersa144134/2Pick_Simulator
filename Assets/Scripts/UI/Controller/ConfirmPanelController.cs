@@ -19,7 +19,6 @@ namespace CardGame.GameSystem.Manager
     /// </summary>
     public class ConfirmPanelController : MonoBehaviour
     {
-        [SerializeField] private GameObject panel;
         [SerializeField] private Text messageText;
         [SerializeField] private Button okButton;
         [SerializeField] private Button backButton;
@@ -29,9 +28,17 @@ namespace CardGame.GameSystem.Manager
         /// </summary>
         public void Initialize(Action onOk, Action onBack)
         {
-            okButton.onClick.AddListener(() => onOk.Invoke());
-            backButton.onClick.AddListener(() => onBack.Invoke());
-            panel.SetActive(false);
+            okButton.onClick.AddListener(() =>
+            {
+                onOk.Invoke();
+            });
+
+            backButton.onClick.AddListener(() =>
+            {
+                onBack.Invoke();
+            });
+
+            gameObject.SetActive(false);
         }
 
         /// <summary>
@@ -39,8 +46,14 @@ namespace CardGame.GameSystem.Manager
         /// </summary>
         public void Show(string message)
         {
+            if (messageText == null)
+            {
+                Debug.LogError("ConfirmPanelController: messageText ‚ª null ‚Å‚·");
+                return;
+            }
+
             messageText.text = message;
-            panel.SetActive(true);
+            gameObject.SetActive(true);
         }
 
         /// <summary>
@@ -48,7 +61,7 @@ namespace CardGame.GameSystem.Manager
         /// </summary>
         public void Hide()
         {
-            panel.SetActive(false);
+            gameObject.SetActive(false);
         }
     }
 }

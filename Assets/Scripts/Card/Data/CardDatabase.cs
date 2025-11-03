@@ -44,6 +44,23 @@ namespace CardGame.CardSystem.Data
             get { return new List<CardData>(cardList); }
         }
 
+        /// <summary>最新パック番号を取得（カードリスト内で最大の PackNumber）</summary>
+        public int LatestPackNumber
+        {
+            get
+            {
+                int maxPack = 0;
+                foreach (CardData data in cardList)
+                {
+                    if (data.PackNumber > maxPack)
+                    {
+                        maxPack = data.PackNumber;
+                    }
+                }
+                return maxPack;
+            }
+        }
+
         // ======================================================
         // コンストラクタ
         // ======================================================
