@@ -1553,6 +1553,7 @@ MonoBehaviour:
   exitButton: {fileID: 1119903030}
   leftPickButton: {fileID: 581100463}
   rightPickButton: {fileID: 1173202949}
+  redrawingButton: {fileID: 902877538}
   pickCountText: {fileID: 1755365537}
   deckCountText: {fileID: 1337713200}
   costCountsTexts:

@@ -76,9 +76,9 @@ namespace CardGame.PickSystem.Manager
                 { 13, new[] { CardData.CardRarity.Silver } },
                 { 14, new[] { CardData.CardRarity.Bronze } },
                 { 15, new[] { CardData.CardRarity.Gold} },
-                { 16, new[] { CardData.CardRarity.Bronze, CardData.CardRarity.Silver } },
-                { 17, new[] { CardData.CardRarity.Silver, CardData.CardRarity.Gold } },
-                { 18, new[] { CardData.CardRarity.Bronze, CardData.CardRarity.Silver, CardData.CardRarity.Gold } },
+                { 16, new[] { CardData.CardRarity.Bronze, CardData.CardRarity.Silver, CardData.CardRarity.Gold, CardData.CardRarity.Legend } },
+                { 17, new[] { CardData.CardRarity.Silver, CardData.CardRarity.Gold, CardData.CardRarity.Legend } },
+                { 18, new[] { CardData.CardRarity.Gold, CardData.CardRarity.Legend } },
                 { 19, new[] { CardData.CardRarity.Legend } }
             };
         }
@@ -109,6 +109,14 @@ namespace CardGame.PickSystem.Manager
 
             // MAX_PICK_COUNTを超えた場合は空配列
             return Array.Empty<CardData.CardRarity>();
+        }
+
+        /// <summary>
+        /// 再抽選で提示するレアリティ配列を取得
+        /// </summary>
+        public CardData.CardRarity[] GetRedrawPickRarities()
+        {
+            return new CardData.CardRarity[] { CardData.CardRarity.Bronze, CardData.CardRarity.Silver, CardData.CardRarity.Gold, CardData.CardRarity.Legend };
         }
 
         /// <summary>

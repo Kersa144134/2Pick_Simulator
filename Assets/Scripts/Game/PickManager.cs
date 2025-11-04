@@ -96,6 +96,10 @@ namespace CardGame.GameSystem.Manager
         /// <summary>右選択ボタン（ピック実行）</summary>
         private Button rightPickButton;
 
+        [SerializeField]
+        /// <summary>カード再抽選ボタン</summary>
+        private Button redrawingButton;
+
         [Header("UI表示設定")]
         [SerializeField]
         /// <summary>現在のピック回数を表示する TextMeshPro テキスト</summary>
@@ -165,6 +169,7 @@ namespace CardGame.GameSystem.Manager
             exitButton.onClick.AddListener(OnExitButtonClicked);
             leftPickButton.onClick.AddListener(() => ExecutePick(PickSide.Left));
             rightPickButton.onClick.AddListener(() => ExecutePick(PickSide.Right));
+            redrawingButton.onClick.AddListener(ExecuteRedraw);
 
             // 確認パネル初期化
             confirmPanel.Initialize(OnConfirmExitOk, OnConfirmExitBack);
@@ -188,33 +193,19 @@ namespace CardGame.GameSystem.Manager
         // ======================================================
 
         /// <summary>
-        /// 抽選実行メソッド  
-        /// 現在のピック段階に応じて4枚のカードを抽選し、左右2枚ずつに仕分けて保持する。
+        /// 通常の抽選
         /// </summary>
         private void ExecuteDraw()
         {
-            // 次に出現するレアリティ配列を取得
-            CardData.CardRarity[] rarities = _pickSequenceManager.GetNextPickRarities();
+            DrawCards(() => _pickSequenceManager.GetNextPickRarities());
+        }
 
-            // 指定レアリティに基づいてメインクラス候補カードを4枚抽選
-            List<CardData> pickCards = _pickCardDisplayManager.PickMainClassCards(rarities);
-
-            // 前回の抽選結果を初期化
-            _pickedCards.Clear();
-
-            // 左側に対応する2枚のカードリストを登録
-            _pickedCards.Add(PickSide.Left, new List<CardData>
-            {
-                pickCards[0],
-                pickCards[1]
-            });
-
-            // 右側に対応する2枚のカードリストを登録
-            _pickedCards.Add(PickSide.Right, new List<CardData>
-            {
-                pickCards[2],
-                pickCards[3]
-            });
+        /// <summary>
+        /// 再抽選
+        /// </summary>
+        private void ExecuteRedraw()
+        {
+            DrawCards(() => _pickSequenceManager.GetRedrawPickRarities());
         }
 
         /// <summary>
@@ -417,6 +408,39 @@ namespace CardGame.GameSystem.Manager
             }
 
             Debug.LogWarning($"選択クラス {selectedClass} に対応する背景スプライトが設定されていません。");
+        }
+
+        // ======================================================
+        // ヘルパーメソッド
+        // ======================================================
+
+        /// <summary>
+        /// カード抽選処理共通メソッド  
+        /// 指定のレアリティ配列取得関数を使って4枚のカードを抽選し、左右2枚ずつに振り分ける。
+        /// </summary>
+        /// <param name="getRarities">抽選に使うレアリティ配列を返す関数</param>
+        private void DrawCards(Func<CardData.CardRarity[]> getRarities)
+        {
+            if (getRarities == null)
+            {
+                Debug.LogWarning("DrawCards: getRarities が null です。");
+                return;
+            }
+
+            // レアリティ配列を取得
+            CardData.CardRarity[] rarities = getRarities();
+
+            // メインクラス候補カードを4枚抽選
+            List<CardData> pickCards = _pickCardDisplayManager.PickMainClassCards(rarities);
+
+            // 前回の抽選結果を初期化
+            _pickedCards.Clear();
+
+            // 左側に2枚登録
+            _pickedCards.Add(PickSide.Left, new List<CardData> { pickCards[0], pickCards[1] });
+
+            // 右側に2枚登録
+            _pickedCards.Add(PickSide.Right, new List<CardData> { pickCards[2], pickCards[3] });
         }
     }
 }
