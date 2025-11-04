@@ -1,9 +1,9 @@
 // ======================================================
-// CardDisplayManager.cs
+// OptionDisplayManager.cs
 // 作成者     : 高橋一翔
 // 作成日時   : 2025-10-31
 // 更新日時   : 2025-10-31
-// 概要       : CardDataのCardImageをCanvas上に横一列で表示する管理クラス
+// 概要       : Option画面でCardImageをCanvas上に横一列で表示する管理クラス
 //             クラスボタン押下で所属カードの表示/非表示を一括切替可能
 // ======================================================
 
@@ -22,7 +22,7 @@ namespace CardGame.UISystem.Manager
     /// <summary>
     /// カード画像の表示制御およびクラスボタンによる一括切替管理クラス
     /// </summary>
-    public class CardDisplayManager : MonoBehaviour
+    public class OptionDisplayManager : MonoBehaviour
     {
         // ======================================================
         // ラッパー構造体（Inspector表示用）

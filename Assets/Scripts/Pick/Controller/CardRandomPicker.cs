@@ -7,10 +7,11 @@
 //             複数クラス・複数レアリティ・ピック率対応（累積型レアリティ先行抽選）
 // ======================================================
 
-using System.Collections.Generic;
-using UnityEngine;
 using CardGame.CardSystem.Data;
 using CardGame.CardSystem.Manager;
+using System.Collections.Generic;
+using Unity.Collections.LowLevel.Unsafe;
+using UnityEngine;
 
 namespace CardGame.PickSystem.Controller
 {
@@ -163,16 +164,16 @@ namespace CardGame.PickSystem.Controller
             // ------------------------------
             // 累積確率型でランダム抽選
             // ------------------------------
-            float r = Random.Range(0f, totalWeight);
+            float random = Random.Range(0f, totalWeight);
             float cumulative = 0f;
 
-            foreach (var kv in weights)
+            foreach (KeyValuePair<CardData.CardRarity, float> keyValue in weights)
             {
-                cumulative += kv.Value;
-                if (r <= cumulative)
+                cumulative += keyValue.Value;
+                if (random <= cumulative)
                 {
                     // 抽選されたレアリティを返す
-                    return kv.Key;
+                    return keyValue.Key;
                 }
             }
 
@@ -201,43 +202,43 @@ namespace CardGame.PickSystem.Controller
             foreach (CardData card in cards)
             {
                 // 基本ウェイトの設定
-                float w = 1.0f;
+                float weight = 1.0f;
 
                 // 最新パックのカードのピック率代入
                 if (card.PackNumber == db.LatestPackNumber)
                 {
-                    w *= LATEST_PACK_WEIGHT;
+                    weight *= LATEST_PACK_WEIGHT;
                 }
 
                 // ニュートラルカードのピック率代入
                 if (card.ClassType == CardData.CardClass.Neutral)
                 {
-                    w *= NEUTRAL_CARD_WEIGHT;
+                    weight *= NEUTRAL_CARD_WEIGHT;
                 }
 
                 // カードごとのウェイトを保存
-                weights[card] = w;
+                weights[card] = weight;
 
                 // 総ウェイトに加算
-                total += w;
+                total += weight;
             }
 
             // 0～総ウェイトの範囲でランダム値を生成
-            float r = Random.Range(0f, total);
+            float random = Random.Range(0f, total);
 
             // ------------------------------
             // 累積ウェイトを使ってカードを決定
             // ------------------------------
             float cumulative = 0f;
 
-            foreach (var kv in weights)
+            foreach (KeyValuePair<CardData, float> keyValue in weights)
             {
                 // 現在のカードのウェイトを累積
-                cumulative += kv.Value; 
-                if (r <= cumulative)
+                cumulative += keyValue.Value; 
+                if (random <= cumulative)
                 {
                     // ランダム値が累積ウェイト以下になった時点でそのカードを選択
-                    return kv.Key;
+                    return keyValue.Key;
                 }
             }
 

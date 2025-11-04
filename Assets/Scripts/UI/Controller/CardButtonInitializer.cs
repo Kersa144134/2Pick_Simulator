@@ -62,7 +62,7 @@ namespace CardGame.UISystem.Initializer
         /// <summary>
         /// クラスボタンを初期化
         /// </summary>
-        public void InitializeClassButtons(CardDisplayManager.CardClassButtonInfo[] classButtons)
+        public void InitializeClassButtons(OptionDisplayManager.CardClassButtonInfo[] classButtons)
         {
             if (classButtons == null || classButtons.Length == 0)
             {
@@ -86,7 +86,7 @@ namespace CardGame.UISystem.Initializer
         /// <summary>
         /// パックボタンを初期化
         /// </summary>
-        public void InitializePackButtons(CardDisplayManager.CardPackButtonInfo[] packButtons)
+        public void InitializePackButtons(OptionDisplayManager.CardPackButtonInfo[] packButtons)
         {
             if (packButtons == null) return;
 
@@ -104,7 +104,7 @@ namespace CardGame.UISystem.Initializer
         /// <summary>
         /// レアリティボタンを初期化
         /// </summary>
-        public void InitializeRarityButtons(CardDisplayManager.CardRarityButtonInfo[] rarityButtons)
+        public void InitializeRarityButtons(OptionDisplayManager.CardRarityButtonInfo[] rarityButtons)
         {
             if (rarityButtons == null) return;
 
@@ -122,7 +122,7 @@ namespace CardGame.UISystem.Initializer
         /// <summary>
         /// コストボタンを初期化
         /// </summary>
-        public void InitializeCostButtons(CardDisplayManager.CardCostButtonInfo[] costButtons)
+        public void InitializeCostButtons(OptionDisplayManager.CardCostButtonInfo[] costButtons)
         {
             if (costButtons == null) return;
 
@@ -141,10 +141,10 @@ namespace CardGame.UISystem.Initializer
         /// すべてのボタンを一括初期化
         /// </summary>
         public void InitializeAll(
-            CardDisplayManager.CardClassButtonInfo[] classButtons,
-            CardDisplayManager.CardPackButtonInfo[] packButtons,
-            CardDisplayManager.CardRarityButtonInfo[] rarityButtons,
-            CardDisplayManager.CardCostButtonInfo[] costButtons
+            OptionDisplayManager.CardClassButtonInfo[] classButtons,
+            OptionDisplayManager.CardPackButtonInfo[] packButtons,
+            OptionDisplayManager.CardRarityButtonInfo[] rarityButtons,
+            OptionDisplayManager.CardCostButtonInfo[] costButtons
         )
         {
             InitializeClassButtons(classButtons);
