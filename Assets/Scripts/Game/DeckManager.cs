@@ -67,9 +67,6 @@ namespace CardGame.DeckSystem.Manager
         /// </summary>
         private void OnExitButtonClicked()
         {
-            // シーン遷移前の確認ログ（デバッグ用）
-            Debug.Log($"シーン遷移 : {targetSceneName} へ移動します。");
-
             // 指定されたシーンへ遷移
             SceneManager.LoadScene(targetSceneName);
         }

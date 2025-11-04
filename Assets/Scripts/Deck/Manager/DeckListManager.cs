@@ -92,18 +92,6 @@ namespace CardGame.DeckSystem.Manager
         /// </summary>
         public List<PickedCardEntry> GetPickedCardEntries()
         {
-            // リスト内容をデバッグ出力
-            Debug.Log("[GetPickedCardEntries] 現在のピック済みカードリスト:");
-            for (int i = 0; i < _pickedCards.Count; i++)
-            {
-                PickedCardEntry entry = _pickedCards[i];
-                string cardName = entry.Card != null ? entry.Card.CardName : "null";
-                int cost = entry.Card != null ? entry.Card.CardCost : -1;
-                int count = entry.Count;
-
-                Debug.Log($"[{i}] {cardName}  (Cost={cost}, Count={count})");
-            }
-
             return _pickedCards;
         }
 

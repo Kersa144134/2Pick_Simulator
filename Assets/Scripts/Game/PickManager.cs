@@ -105,6 +105,10 @@ namespace CardGame.GameSystem.Manager
         /// <summary>現在の総カード枚数を表示する TextMeshPro テキスト</summary>
         private TMP_Text deckCountText;
 
+        [SerializeField]
+        [Tooltip("コストごとのカード枚数表示用 Text リスト（0～10）")]
+        private List<Text> costCountsTexts = new List<Text>();
+
         [Header("背景設定")]
 
         [SerializeField]
@@ -176,6 +180,7 @@ namespace CardGame.GameSystem.Manager
 
             // 初回UI更新
             UpdatePickAndCardCountText();
+            UpdateCostCountsTexts();
         }
 
         // ======================================================
@@ -242,8 +247,9 @@ namespace CardGame.GameSystem.Manager
                 return;
             }
 
-            // UI更新（ピック回数・総カード枚数）
+            // UI更新
             UpdatePickAndCardCountText();
+            UpdateCostCountsTexts();
 
             // 新たなピック候補を再抽選
             ExecuteDraw();
@@ -349,7 +355,45 @@ namespace CardGame.GameSystem.Manager
 
             deckCountText.text = $"{totalCardCount.ToString("00")} / 40";
         }
-        
+
+        /// <summary>
+        /// デッキ内のコストごとのカード枚数を更新して TextMeshPro に反映する
+        /// </summary>
+        private void UpdateCostCountsTexts()
+        {
+            if (DeckListManager.Instance == null || costCountsTexts.Count == 0)
+            {
+                return;
+            }
+
+            // コストごとの枚数を初期化
+            int[] costCounts = new int[costCountsTexts.Count];
+
+            // ピック済みカードリストを取得
+            List<DeckListManager.PickedCardEntry> pickedEntries = DeckListManager.Instance.GetPickedCardEntries();
+
+            foreach (var entry in pickedEntries)
+            {
+                int cost = entry.Card != null ? entry.Card.CardCost : -1;
+
+                if (cost >= 0 && cost < costCounts.Length)
+                {
+                    // 同コストのカード枚数を加算
+                    costCounts[cost] += entry.Count;
+                }
+            }
+
+            // Text に反映
+            for (int i = 0; i < costCounts.Length; i++)
+            {
+                Text text = costCountsTexts[i];
+                if (text != null)
+                {
+                    text.text = costCounts[i].ToString();
+                }
+            }
+        }
+
         /// <summary>
         /// DeckListManager の SelectedClass に対応する背景画像を設定する
         /// </summary>
