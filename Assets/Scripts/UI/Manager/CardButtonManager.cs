@@ -53,12 +53,6 @@ namespace CardGame.UISystem.Controller
         // プロパティ  
         // ======================================================  
 
-        /// <summary>ボタンコンポーネントへの読み取り専用アクセス</summary>
-        public Button Button => _button;
-
-        /// <summary>ボタンのオン／オフ色設定への読み取り専用アクセス</summary>
-        public ButtonColorSettings ColorSettings => _colorSettings;
-
         /// <summary>ボタンの現在押下状態</summary>  
         public bool IsActive => _isActive;
 
@@ -237,7 +231,7 @@ namespace CardGame.UISystem.Controller
             // --------------------------------------------------
             // クラスフィルタ適用
             // --------------------------------------------------
-            var activeClassButtons = ClassButtons.FindAll(b => b.IsActive);
+            List<CardClassButton> activeClassButtons = ClassButtons.FindAll(b => b.IsActive);
             if (activeClassButtons.Count > 0)
             {
                 filteredCards = filteredCards.FindAll(cd => activeClassButtons.Exists(b => cd.ClassType == b.FilterValue));
@@ -246,7 +240,7 @@ namespace CardGame.UISystem.Controller
             // --------------------------------------------------
             // パックフィルタ適用
             // --------------------------------------------------
-            var activePackButtons = PackButtons.FindAll(b => b.IsActive);
+            List<CardPackButton> activePackButtons = PackButtons.FindAll(b => b.IsActive);
             if (activePackButtons.Count > 0)
             {
                 filteredCards = filteredCards.FindAll(cd => activePackButtons.Exists(b => cd.PackNumber == b.FilterValue));
@@ -255,7 +249,7 @@ namespace CardGame.UISystem.Controller
             // --------------------------------------------------
             // レアリティフィルタ適用
             // --------------------------------------------------
-            var activeRarityButtons = RarityButtons.FindAll(b => b.IsActive);
+            List<CardRarityButton> activeRarityButtons = RarityButtons.FindAll(b => b.IsActive);
             if (activeRarityButtons.Count > 0)
             {
                 filteredCards = filteredCards.FindAll(cd => activeRarityButtons.Exists(b => cd.Rarity == b.FilterValue));
@@ -264,7 +258,7 @@ namespace CardGame.UISystem.Controller
             // --------------------------------------------------
             // コストフィルタ適用
             // --------------------------------------------------
-            var activeCostButtons = CostButtons.FindAll(b => b.IsActive);
+            List<CardCostButton> activeCostButtons = CostButtons.FindAll(b => b.IsActive);
             if (activeCostButtons.Count > 0)
             {
                 filteredCards = filteredCards.FindAll(cd => activeCostButtons.Exists(b => cd.CardCost == b.FilterValue));

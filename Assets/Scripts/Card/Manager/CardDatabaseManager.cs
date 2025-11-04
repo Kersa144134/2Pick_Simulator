@@ -92,7 +92,7 @@ namespace CardGame.CardSystem.Manager
         }
 
         /// <summary>
-        /// CardDataLoaderを取得する（必要に応じて）
+        /// CardDataLoaderを取得する
         /// </summary>
         public CardDataLoader GetCardDataLoader()
         {

@@ -7,9 +7,9 @@
 //              新規作成と既存カードの画像更新を分けて処理可能
 // ======================================================
 
+using System.IO;
 using UnityEngine;
 using UnityEditor;
-using System.IO;
 using CardGame.CardSystem.Data;
 
 namespace CardGame.CardSystem.Utility
@@ -24,19 +24,19 @@ namespace CardGame.CardSystem.Utility
         // ======================================================
 
         /// <summary>画像のルートフォルダ（Assets上）</summary>
-        private const string ImagesRootPath = "Assets/Resources/Images/Cards/";
+        private const string IMAGES_ROOT_PATH = "Assets/Resources/Images/Cards/";
 
         /// <summary>ScriptableObject 出力先フォルダ（Assets上）</summary>
-        private const string ResourcesRootPath = "Assets/Resources/Cards/";
+        private const string RESOURCES_ROOT_PATH = "Assets/Resources/Cards/";
 
         /// <summary>Resources.Load 用のルートパス</summary>
-        private const string ResourcesLoadRoot = "Images/Cards/";
+        private const string RESOURCES_LOAD_ROOT = "Images/Cards/";
 
         /// <summary>カードID の桁数（ファイル名先頭5文字）</summary>
-        private const int CardIdLength = 5;
+        private const int CARD_ID_LENGTH = 5;
 
         /// <summary>初期最大枚数</summary>
-        private const int DefaultMaxCopies = 3;
+        private const int DEFAULT_MAX_COPIES = 3;
 
         // ======================================================
         // メニューコマンド
@@ -73,7 +73,7 @@ namespace CardGame.CardSystem.Utility
         private static void ProcessAllCardFiles(bool isUpdateOnly)
         {
             // クラスフォルダを取得
-            string[] classFolders = Directory.GetDirectories(ImagesRootPath);
+            string[] classFolders = Directory.GetDirectories(IMAGES_ROOT_PATH);
 
             foreach (string classFolder in classFolders)
             {
@@ -104,14 +104,14 @@ namespace CardGame.CardSystem.Utility
                     string fileName = Path.GetFileNameWithoutExtension(filePath);
 
                     // ファイル名が短すぎる場合はスキップ
-                    if (fileName.Length < CardIdLength + 1)
+                    if (fileName.Length < CARD_ID_LENGTH + 1)
                     {
                         Debug.LogWarning($"[CardDataGenerator] ファイル名短すぎ: {fileName}");
                         continue;
                     }
 
                     // カードIDを取得
-                    string idStr = fileName.Substring(0, CardIdLength);
+                    string idStr = fileName.Substring(0, CARD_ID_LENGTH);
                     if (!int.TryParse(idStr, out int cardId))
                     {
                         Debug.LogWarning($"[CardDataGenerator] ID変換失敗: {fileName}");
@@ -128,7 +128,7 @@ namespace CardGame.CardSystem.Utility
                     string cardName = fileName.Substring(underscoreIndex + 1);
 
                     // 保存先フォルダ作成
-                    string outputFolder = Path.Combine(ResourcesRootPath, folderName);
+                    string outputFolder = Path.Combine(RESOURCES_ROOT_PATH, folderName);
                     if (!Directory.Exists(outputFolder))
                     {
                         Directory.CreateDirectory(outputFolder);
@@ -175,7 +175,7 @@ namespace CardGame.CardSystem.Utility
 
                     // 最大枚数設定（非公開フィールド）
                     cardSO.GetType().GetField("maxCopies", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance)
-                        .SetValue(cardSO, DefaultMaxCopies);
+                        .SetValue(cardSO, DEFAULT_MAX_COPIES);
 
                     // AssetDatabase に保存
                     AssetDatabase.CreateAsset(cardSO, assetPath);
@@ -204,7 +204,7 @@ namespace CardGame.CardSystem.Utility
         /// </summary>
         private static void ApplyCardImage(CardData cardSO, string folderName, string fileName, string cardName, int cardId)
         {
-            string resourcePath = $"{ResourcesLoadRoot}{folderName}/{fileName}";
+            string resourcePath = $"{RESOURCES_LOAD_ROOT}{folderName}/{fileName}";
             Sprite sprite = Resources.Load<Sprite>(resourcePath);
 
             if (sprite != null)

@@ -1273,12 +1273,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 366b22db5c60de743a2cbdc7f66a0ff4, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  startButton: {fileID: 1282729111}
-  optionButton: {fileID: 136613800}
-  optionBackButton: {fileID: 999260542}
   titleCanvas: {fileID: 781969517}
   classSelectCanvas: {fileID: 857010909}
   optionCanvas: {fileID: 1853853585}
+  startButton: {fileID: 1282729111}
+  optionButton: {fileID: 136613800}
+  optionBackButton: {fileID: 999260542}
 --- !u!4 &259585936
 Transform:
   m_ObjectHideFlags: 0
@@ -2593,10 +2593,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0644419586b0a9f40be85f3962703e8b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  panel: {fileID: 2101109006}
   messageText: {fileID: 1586134887}
   okButton: {fileID: 1107738134}
   backButton: {fileID: 1589916700}
+  sceneNameOnOk: PickScene
 --- !u!1 &650313437
 GameObject:
   m_ObjectHideFlags: 0

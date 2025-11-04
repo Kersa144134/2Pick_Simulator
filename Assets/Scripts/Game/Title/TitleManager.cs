@@ -24,19 +24,6 @@ namespace CardGame.GameSystem.Manager
         // インスペクタ設定
         // ======================================================
 
-        [Header("ボタン設定")]
-        [SerializeField]
-        /// <summary>STARTボタン</summary>
-        private Button startButton;
-
-        [SerializeField]
-        /// <summary>OPTIONボタン</summary>
-        private Button optionButton;
-
-        [SerializeField]
-        /// <summary>OPTIONキャンバス用の戻るボタン</summary>
-        private Button optionBackButton;
-
         [Header("キャンバス設定")]
         [SerializeField]
         /// <summary>タイトル画面用メインキャンバス</summary>
@@ -48,7 +35,20 @@ namespace CardGame.GameSystem.Manager
 
         [SerializeField]
         /// <summary>オプション設定用キャンバス</summary>
-        private GameObject optionCanvas;
+        private GameObject optionCanvas; 
+        
+        [Header("ボタン設定")]
+        [SerializeField]
+        /// <summary>Startボタン</summary>
+        private Button startButton;
+
+        [SerializeField]
+        /// <summary>Optionボタン</summary>
+        private Button optionButton;
+
+        [SerializeField]
+        /// <summary>Optionキャンバス用の戻るボタン</summary>
+        private Button optionBackButton;
 
         // ======================================================
         // Unityイベント
