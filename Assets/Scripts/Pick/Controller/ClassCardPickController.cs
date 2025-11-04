@@ -8,7 +8,6 @@
 // ======================================================
 
 using System.Collections.Generic;
-using UnityEngine;
 using CardGame.CardSystem.Data;
 
 namespace CardGame.PickSystem.Controller
@@ -24,18 +23,38 @@ namespace CardGame.PickSystem.Controller
 
         /// <summary>
         /// 指定されたクラスから2枚のカードをランダム抽選する
-        /// 条件：ニュートラル＋指定クラス、かつゴールド or レジェンド
+        /// クラス選択時の抽選メソッド
         /// </summary>
         /// <param name="db">カードデータベース</param>
         /// <param name="cardClass">抽選対象クラス</param>
         /// <returns>抽選されたカードデータのリスト（最大2枚）</returns>
-        public List<CardData> PickClassCards(CardDatabase db, CardData.CardClass cardClass)
+        public List<CardData> PickInitialClassCards(CardDatabase db, CardData.CardClass cardClass)
         {
             List<CardData> cardDatas = CardRandomPicker.GetRandomCardsByClassAndRarity(
                 db,
                 2,
                 new CardData.CardClass[] { CardData.CardClass.Neutral, cardClass },
                 new CardData.CardRarity[] { CardData.CardRarity.Gold, CardData.CardRarity.Legend }
+            );
+
+            return cardDatas;
+        }
+
+        /// <summary>
+        /// 指定されたクラスから4枚のカードをランダム抽選する
+        /// ピックシーンでの抽選メソッド
+        /// </summary>
+        /// <param name="db">カードデータベース</param>
+        /// <param name="cardClass">抽選対象クラス</param>
+        /// <param name="cardRarities">抽選対象レアリティ</param>
+        /// <returns>抽選されたカードデータのリスト（最大4枚）</returns>
+        public List<CardData> PickMainClassCards(CardDatabase db, CardData.CardClass cardClass, CardData.CardRarity[] cardRarities)
+        {
+            List<CardData> cardDatas = CardRandomPicker.GetRandomCardsByClassAndRarity(
+                db,
+                4,
+                new CardData.CardClass[] { CardData.CardClass.Neutral, cardClass },
+                cardRarities
             );
 
             return cardDatas;

@@ -2,8 +2,9 @@
 // DeckListManager.cs
 // 作成者     : 高橋一翔
 // 作成日時   : 2025-11-03
-// 更新日時   : 2025-11-03
+// 更新日時   : 2025-11-04
 // 概要       : 選択クラスとピックカードリストを管理するシングルトンクラス
+//              同種カードを複数枚保持可能（カード＋枚数構造）
 // ======================================================
 
 using System.Collections.Generic;
@@ -13,11 +14,37 @@ using CardGame.CardSystem.Data;
 namespace CardGame.DeckSystem.Manager
 {
     /// <summary>
-    /// デッキ情報管理クラス
-    /// 選択クラスとピック済みカードリストを保持する
+    /// デッキ情報管理クラス  
+    /// 選択クラスとピック済みカードリストを保持する（同一カードの重複も管理）
     /// </summary>
     public class DeckListManager : MonoBehaviour
     {
+        // ======================================================
+        // 構造体定義
+        // ======================================================
+
+        /// <summary>
+        /// ピックカード情報構造体（カードデータ＋枚数）
+        /// </summary>
+        [System.Serializable]
+        public struct PickedCardEntry
+        {
+            /// <summary>カードデータ</summary>
+            public CardData Card;
+
+            /// <summary>枚数</summary>
+            public int Count;
+
+            /// <summary>
+            /// コンストラクタ
+            /// </summary>
+            public PickedCardEntry(CardData card, int count)
+            {
+                Card = card;
+                Count = count;
+            }
+        }
+
         // ======================================================
         // シングルトン
         // ======================================================
@@ -30,10 +57,10 @@ namespace CardGame.DeckSystem.Manager
         // ======================================================
 
         /// <summary>選択されたクラス</summary>
-        private CardData.CardClass _selectedClass;
+        private CardData.CardClass _selectedClass = CardData.CardClass.Elf;
 
-        /// <summary>ピック済みカードリスト</summary>
-        private List<CardData> _pickedCards = new List<CardData>();
+        /// <summary>ピック済みカードリスト（カード＋枚数）</summary>
+        private List<PickedCardEntry> _pickedCards = new List<PickedCardEntry>();
 
         // ======================================================
         // プロパティ
@@ -45,9 +72,6 @@ namespace CardGame.DeckSystem.Manager
             get { return _selectedClass; }
             set { _selectedClass = value; }
         }
-
-        /// <summary>ピックカードリストの取得</summary>
-        public List<CardData> PickedCards => _pickedCards;
 
         // ======================================================
         // Unityイベント
@@ -70,23 +94,45 @@ namespace CardGame.DeckSystem.Manager
         // ======================================================
 
         /// <summary>
-        /// 現在ピック済みのカードリストを返す
+        /// ピック済みカードリストを返す
         /// </summary>
-        public List<CardData> GetPickedCards()
+        public List<PickedCardEntry> GetPickedCardEntries()
         {
             return _pickedCards;
         }
 
         /// <summary>
-        /// カードをピック済みリストに追加
+        /// カードをピック済みリストに追加  
+        /// すでに同じカードが存在する場合は枚数を加算する  
+        /// 追加後はコスト昇順、次いで CardID 昇順でソートする
         /// </summary>
-        /// <param name="card">ピックされたカード</param>
+        /// <param name="card">追加対象カード</param>
         public void AddPickedCard(CardData card)
         {
-            if (card != null && !_pickedCards.Contains(card))
+            if (card == null)
             {
-                _pickedCards.Add(card);
+                Debug.LogWarning("AddPickedCard：cardがnullです。");
+                return;
             }
+
+            // 既存カード検索
+            int index = _pickedCards.FindIndex(entry => entry.Card == card);
+
+            if (index >= 0)
+            {
+                // 既存カードがある場合 → 枚数加算
+                PickedCardEntry existing = _pickedCards[index];
+                existing.Count++;
+                _pickedCards[index] = existing;
+            }
+            else
+            {
+                // 新規カード追加
+                _pickedCards.Add(new PickedCardEntry(card, 1));
+            }
+
+            // ソート処理を呼び出し
+            SortPickedCards();
         }
 
         /// <summary>
@@ -98,12 +144,55 @@ namespace CardGame.DeckSystem.Manager
         }
 
         /// <summary>
-        /// デッキ情報をリセット
+        /// デッキ全体をリセット
         /// </summary>
         public void ResetDeck()
         {
             _selectedClass = default;
             ResetPickedCards();
+        }
+
+        // ======================================================
+        // ソート処理
+        // ======================================================
+
+        /// <summary>
+        /// ピック済みカードリストをコスト → CardID の昇順で並び替える。  
+        /// コストが同値の場合は CardID で安定化させる。
+        /// </summary>
+        private void SortPickedCards()
+        {
+            if (_pickedCards == null || _pickedCards.Count <= 1)
+            {
+                return;
+            }
+
+            // 並び替え前の確認ログ
+            Debug.Log("[SortPickedCards] ソート前:");
+            foreach (var e in _pickedCards)
+            {
+                Debug.Log($"  {e.Card.CardName}  (Cost={e.Card.CardCost}, ID={e.Card.CardId})");
+            }
+
+            // --------------------------------------------
+            // 第1条件：コスト昇順、第2条件：CardID昇順
+            // --------------------------------------------
+            _pickedCards.Sort((a, b) =>
+            {
+                int costCompare = a.Card.CardCost.CompareTo(b.Card.CardCost);
+                if (costCompare != 0)
+                {
+                    return costCompare;
+                }
+                return a.Card.CardId.CompareTo(b.Card.CardId);
+            });
+
+            // 並び替え後の確認ログ
+            Debug.Log("[SortPickedCards] ソート後:");
+            foreach (var e in _pickedCards)
+            {
+                Debug.Log($"  {e.Card.CardName}  (Cost={e.Card.CardCost}, ID={e.Card.CardId})");
+            }
         }
     }
 }

@@ -102,8 +102,10 @@ namespace CardGame.UISystem.Controller
             // --------------------------------------
             HashSet<CardData> visibleSet = new HashSet<CardData>(visibleCardData);
 
-            int visibleIndex = 0; // 可視カード配置用インデックス
-            int hiddenIndex = 0;  // 非表示カード配置用インデックス
+            // 可視カード配置用インデックス
+            int visibleIndex = 0;
+            // 非表示カード配置用インデックス
+            int hiddenIndex = 0;
 
             // --------------------------------------
             // カードごとに表示/非表示を振り分け

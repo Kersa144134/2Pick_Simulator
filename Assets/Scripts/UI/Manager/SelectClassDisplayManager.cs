@@ -1,5 +1,5 @@
 // ======================================================
-// ClassSelectDisplayManager.cs
+// SelectClassDisplayManager.cs
 // 作成者     : 高橋一翔
 // 作成日時   : 2025-11-03
 // 更新日時   : 2025-11-04
@@ -25,7 +25,7 @@ namespace CardGame.UISystem.Manager
     /// クラス選択キャンバスの管理クラス  
     /// クラスごとの初回抽選を行い、選択されたクラスのカードをデッキに登録してシーン遷移する。
     /// </summary>
-    public class ClassSelectDisplayManager : MonoBehaviour
+    public class SelectClassDisplayManager : MonoBehaviour
     {
         // ======================================================
         // 構造体
@@ -61,7 +61,7 @@ namespace CardGame.UISystem.Manager
         private string targetSceneName = "PickScene";
 
         // ======================================================
-        // フィールド
+        // コンポーネント参照
         // ======================================================
 
         /// <summary>カードデータベース（抽選元データ）</summary>
@@ -72,6 +72,10 @@ namespace CardGame.UISystem.Manager
 
         /// <summary>カード抽選を管理するコントローラ</summary>
         private readonly ClassCardPickController _cardPickController = new ClassCardPickController();
+
+        // ======================================================
+        // フィールド
+        // ======================================================
 
         /// <summary>選択中のクラスインデックス</summary>
         private int _selectedClassIndex = -1;
@@ -144,11 +148,11 @@ namespace CardGame.UISystem.Manager
                     continue;
                 }
 
-                // 抽選処理（ニュートラル＋クラスのゴールド/レジェンド2枚）
-                List<CardData> pickedCards = _cardPickController.PickClassCards(_cardDatabase, btnData.Class);
+                // 最初の抽選処理
+                List<CardData> pickedCards = _cardPickController.PickInitialClassCards(_cardDatabase, btnData.Class);
 
                 // 表示処理（抽選結果をUIに反映）
-                _cardDisplayController.DisplayPickedCards(btnData.Button, pickedCards);
+                _cardDisplayController.DisplayInitialPickedCards(btnData.Button, pickedCards);
 
                 // 結果を保持（クラスごとに格納）
                 if (!_classPickedCards.ContainsKey(btnData.Class))

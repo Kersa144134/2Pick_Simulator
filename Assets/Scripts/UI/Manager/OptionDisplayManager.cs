@@ -69,31 +69,6 @@ namespace CardGame.UISystem.Manager
         }
 
         // ======================================================
-        // コンポーネント参照
-        // ======================================================
-
-        /// <summary>カードフィルタボタンの状態管理と押下イベントを統合したクラス</summary>
-        private CardButtonManager _buttonManager;
-
-        /// <summary>カードデータベース（最大枚数管理用）</summary>
-        private CardDatabase _cardDatabase;
-        
-        /// <summary>CardDataをロード、キャッシュするクラス</summary>
-        private CardDataLoader _loader = new CardDataLoader();
-
-        /// <summary></summary>
-        private CardFilterGroupController _filterGroupController;
-
-        /// <summary></summary>
-        private CardDisplayRefresher _displayRefresher;
-
-        /// <summary>スクロール制御用コントローラ（RectTransform移動版）</summary>
-        private CardScrollController _scrollController;
-
-        /// <summary>カードの表示/非表示を一括管理するクラス</summary>
-        private CardVisibilityController _visibilityController;
-
-        // ======================================================
         // インスペクタ設定
         // ======================================================
 
@@ -155,6 +130,31 @@ namespace CardGame.UISystem.Manager
         private CardCostButtonInfo[] costButtons;
 
         // ======================================================
+        // コンポーネント参照
+        // ======================================================
+
+        /// <summary>カードフィルタボタンの状態管理と押下イベントを統合したクラス</summary>
+        private CardButtonManager _buttonManager;
+
+        /// <summary>カードデータベース（最大枚数管理用）</summary>
+        private CardDatabase _cardDatabase;
+
+        /// <summary>CardDataをロード、キャッシュするクラス</summary>
+        private CardDataLoader _loader = new CardDataLoader();
+
+        /// <summary></summary>
+        private CardFilterGroupController _filterGroupController;
+
+        /// <summary></summary>
+        private CardDisplayRefresher _displayRefresher;
+
+        /// <summary>スクロール制御用コントローラ（RectTransform移動版）</summary>
+        private CardScrollController _scrollController;
+
+        /// <summary>カードの表示/非表示を一括管理するクラス</summary>
+        private CardVisibilityController _visibilityController;
+
+        // ======================================================
         // フィールド
         // ======================================================
 
@@ -171,7 +171,7 @@ namespace CardGame.UISystem.Manager
         // Unityイベント
         // ======================================================
 
-        private void Start()
+        private void Awake()
         {
             InitializeCardData();
             InitializeButtonManager();
@@ -186,7 +186,10 @@ namespace CardGame.UISystem.Manager
                 _scrollController,
                 _cardDisplays
             );
+        }
 
+        private void Start()
+        {
             RefreshDisplay();
         }
 
@@ -300,24 +303,6 @@ namespace CardGame.UISystem.Manager
         private void RefreshDisplay()
         {
             _displayRefresher.Refresh(_visibleCardData);
-        }
-
-        // ======================================================
-        // フィルターボタンパネル制御
-        // ======================================================
-
-        /// <summary>
-        /// フィルター群全体の表示/非表示をトグル切替する  
-        /// オプションボタンから呼び出される
-        /// </summary>
-        public void ToggleAllOptionButtons()
-        {
-            if (_filterGroupController == null)
-            {
-                return;
-            }
-
-            _filterGroupController.ToggleAllGroups();
         }
     }
 }

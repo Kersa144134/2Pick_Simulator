@@ -37,6 +37,19 @@ namespace CardGame.PickSystem.Manager
         private readonly Dictionary<int, CardData.CardRarity[]> _pickRarityMap;
 
         // ======================================================
+        // プロパティ
+        // ======================================================
+
+        /// <summary>現在のピック順（0開始）</summary>
+        public int CurrentPickIndex => _currentPickIndex;
+
+        /// <summary>最大ピック回数</summary>
+        public int GetMaxPickCount()
+        {
+            return MAX_PICK_COUNT;
+        }
+
+        // ======================================================
         // コンストラクタ
         // ======================================================
 
@@ -75,14 +88,6 @@ namespace CardGame.PickSystem.Manager
         // ======================================================
 
         /// <summary>
-        /// 現在のピック順を取得
-        /// </summary>
-        public int GetCurrentPickIndex()
-        {
-            return _currentPickIndex;
-        }
-
-        /// <summary>
         /// 残りピック回数を取得
         /// </summary>
         public int GetRemainingPickCount()
@@ -95,7 +100,7 @@ namespace CardGame.PickSystem.Manager
         /// </summary>
         public CardData.CardRarity[] GetNextPickRarities()
         {
-            int nextIndex = _currentPickIndex + 1; // 1開始順目
+            int nextIndex = _currentPickIndex + 1;
 
             if (_pickRarityMap.TryGetValue(nextIndex, out CardData.CardRarity[] rarities))
             {

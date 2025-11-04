@@ -27,7 +27,7 @@ namespace CardGame.UISystem.Controller
         /// </summary>
         /// <param name="classButton">カードを表示する対象のクラスボタン</param>
         /// <param name="cardList">表示対象となる2枚のカードデータ</param>
-        public void DisplayPickedCards(Button classButton, List<CardData> cardList)
+        public void DisplayInitialPickedCards(Button classButton, List<CardData> cardList)
         {
             // --------------------------------------------------
             // ボタンの子オブジェクトからImageコンポーネントを取得
@@ -71,19 +71,67 @@ namespace CardGame.UISystem.Controller
             // --------------------------------------------------
             for (int i = 0; i < childImages.Count && i < cardList.Count; i++)
             {
+                Image targetImage = childImages[i];
                 CardData card = cardList[i];
 
                 // カード画像が存在すれば設定し、有効化
                 if (card != null && card.CardImage != null)
                 {
-                    childImages[i].sprite = card.CardImage;
-                    childImages[i].enabled = true;
+                    targetImage.sprite = card.CardImage;
+                    targetImage.enabled = true;
                 }
                 else
                 {
                     // カード画像がない場合は非表示にする
-                    childImages[i].enabled = false;
+                    targetImage.enabled = false;
                 }
+            }
+        }
+
+        /// <summary>
+        /// 指定されたクラスボタン群に対して、対応するカード画像を反映する。
+        /// 各要素の対応は index 順で行う。
+        /// </summary>
+        /// <param name="images">カードを表示する Image コンポーネント群（要素2想定）</param>
+        /// <param name="cardList">表示対象となるカードデータ群（要素2想定）</param>
+        public void DisplayMainPickedCards(List<Image> images, List<CardData> cardList)
+        {
+            // 引数のnullまたは要素数不一致を検出
+            if (images == null || cardList == null)
+            {
+                Debug.LogWarning("[DisplayMainPickedCards] 引数がnullです。");
+                return;
+            }
+
+            if (images.Count != cardList.Count)
+            {
+                Debug.LogWarning($"[DisplayMainPickedCards] 要素数が一致しません。Image={images.Count}, Card={cardList.Count}");
+                return;
+            }
+
+            // 各スロットにカード画像を適用
+            for (int i = 0; i < images.Count; i++)
+            {
+                Image targetImage = images[i];
+                CardData cardData = cardList[i];
+
+                // ImageまたはCardDataがnullの場合はスキップ
+                if (targetImage == null || cardData == null)
+                {
+                    Debug.LogWarning($"[DisplayMainPickedCards] index={i} の要素がnullです。");
+                    continue;
+                }
+
+                // カードデータ内にスプライトが存在するか確認
+                if (cardData.CardImage == null)
+                {
+                    Debug.LogWarning($"[DisplayMainPickedCards] {cardData.CardName} にスプライトが設定されていません。");
+                    continue;
+                }
+
+                // 対象ImageにSpriteを適用
+                targetImage.sprite = cardData.CardImage;
+                targetImage.enabled = true;
             }
         }
     }

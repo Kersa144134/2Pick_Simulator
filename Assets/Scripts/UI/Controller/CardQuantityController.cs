@@ -31,13 +31,7 @@ namespace CardGame.UISystem.Controller
         private CardDatabase _database;
 
         /// <summary>現在の枚数を表示するテキスト</summary>
-        private TextMeshProUGUI quantityText;
-
-        /// <summary>＋ボタン</summary>
-        private Button _plusButton;
-
-        /// <summary>−ボタン</summary>
-        private Button _minusButton;
+        private TextMeshProUGUI _quantityText;
 
         // ======================================================
         // 初期化
@@ -47,38 +41,19 @@ namespace CardGame.UISystem.Controller
         /// カード1枚分の情報をもとにUIを初期化する  
         /// CardDisplayManager から生成時に呼び出す
         /// </summary>
-        public void Initialize(GameObject obj, CardData cardData, CardDatabase database)
+        public void Initialize(GameObject obj,
+            TextMeshProUGUI text,
+            Button plusButton,
+            Button minusButton,
+            CardData cardData,
+            CardDatabase database)
         {
+            _quantityText = text;
             _cardData = cardData;
             _database = database;
 
-            // 子階層からテキスト、ボタンを取得
-            Transform quantityTransform = obj.transform.Find("Quantity");
-            Transform plusTransform = obj.transform.Find("Plus");
-            Transform minusTransform = obj.transform.Find("Minus");
-
-            if (quantityTransform != null)
-            {
-                quantityText = quantityTransform.GetComponent<TextMeshProUGUI>();
-            }
-
-            if (plusTransform != null)
-            {
-                _plusButton = plusTransform.GetComponent<Button>();
-                if (_plusButton != null)
-                {
-                    _plusButton.onClick.AddListener(OnPlusClicked);
-                }
-            }
-
-            if (minusTransform != null)
-            {
-                _minusButton = minusTransform.GetComponent<Button>();
-                if (_minusButton != null)
-                {
-                    _minusButton.onClick.AddListener(OnMinusClicked);
-                }
-            }
+            plusButton.onClick.AddListener(OnPlusClicked);
+            minusButton.onClick.AddListener(OnMinusClicked);
 
             // 初期表示更新
             UpdateQuantityText();
@@ -116,7 +91,7 @@ namespace CardGame.UISystem.Controller
         private void UpdateQuantityText()
         {
             int current = _database.GetMaxCopies(_cardData.CardId);
-            quantityText.text = $"{current}";
+            _quantityText.text = $"{current}";
         }
     }
 }
