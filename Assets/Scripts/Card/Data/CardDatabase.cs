@@ -61,6 +61,25 @@ namespace CardGame.CardSystem.Data
             }
         }
 
+
+
+        // ======================================================
+        // 辞書
+        // ======================================================
+
+        /// <summary>クラス列挙値からカタカナ名への変換辞書</summary>
+        public readonly Dictionary<CardData.CardClass, string> ClassNameMap = new Dictionary<CardData.CardClass, string>()
+        {
+            { CardData.CardClass.Neutral, "ニュートラル" },
+            { CardData.CardClass.Elf, "エルフ" },
+            { CardData.CardClass.Royal, "ロイヤル" },
+            { CardData.CardClass.Witch, "ウィッチ" },
+            { CardData.CardClass.Dragon, "ドラゴン" },
+            { CardData.CardClass.Nightmare, "ナイトメア" },
+            { CardData.CardClass.Bishop, "ビショップ" },
+            { CardData.CardClass.Nemesis, "ネメシス" }
+        };
+        
         // ======================================================
         // コンストラクタ
         // ======================================================

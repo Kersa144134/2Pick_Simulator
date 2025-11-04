@@ -12,13 +12,17 @@ using UnityEngine;
 using CardGame.CardSystem.Data;
 using CardGame.CardSystem.Manager;
 
-namespace CardGame.GameSystem.Manager
+namespace CardGame.PickSystem.Controller
 {
     /// <summary>
     /// カードのランダム抽選を管理
     /// </summary>
     public static class CardRandomPicker
     {
+        // ======================================================
+        // 定数
+        // ======================================================
+
         /// <summary>最新パックカードのピック率補正値</summary>
         private const float LATEST_PACK_WEIGHT = 1.2f;
 

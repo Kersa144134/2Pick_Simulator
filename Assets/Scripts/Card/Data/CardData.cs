@@ -7,6 +7,7 @@
 //             カードIDからクラス・パック・レアリティを自動判別
 // ======================================================
 
+using System.Collections.Generic;
 using UnityEngine;
 
 namespace CardGame.CardSystem.Data
@@ -148,28 +149,6 @@ namespace CardGame.CardSystem.Data
         public int SubId
         {
             get { return cardId % 10; }
-        }
-
-        // ======================================================
-        // パブリックメソッド
-        // ======================================================
-
-        /// <summary>
-        /// カード情報を整形してコンソール出力（デバッグ用）
-        /// </summary>
-        public void PrintCardInfo()
-        {
-            // 解析した各情報を出力してデータ確認を容易にする
-            Debug.Log(
-                $"[Card Info]\n" +
-                $"ID: {cardId}\n" +
-                $"Class: {ClassType}\n" +
-                $"Pack: {PackNumber}\n" +
-                $"Rarity: {Rarity}\n" +
-                $"Name: {cardName}\n" +
-                $"Text: {cardText}\n" +
-                $"Max Copies: {maxCopies}"
-            );
         }
     }
 }

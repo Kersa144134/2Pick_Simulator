@@ -10,6 +10,7 @@
 
 using UnityEngine;
 using UnityEngine.UI;
+using CardGame.DeckSystem.Manager;
 
 namespace CardGame.GameSystem.Manager
 {
@@ -108,6 +109,8 @@ namespace CardGame.GameSystem.Manager
             {
                 classSelectCanvas.SetActive(true);
             }
+
+            DeckListManager.Instance.ResetDeck();
         }
 
         /// <summary>

@@ -13,7 +13,7 @@ using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.SceneManagement;
 
-namespace CardGame.GameSystem.Manager
+namespace CardGame.UISystem.Controller
 {
     /// <summary>
     /// 汎用確認パネル管理クラス
