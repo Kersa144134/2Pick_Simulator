@@ -20,24 +20,18 @@ namespace CardGame.DeckSystem.Manager
     public class DeckListManager : MonoBehaviour
     {
         // ======================================================
-        // 構造体定義
+        // サブクラス
         // ======================================================
 
         /// <summary>
-        /// ピックカード情報構造体（カードデータ＋枚数）
+        /// ピックカード情報サブクラス
         /// </summary>
         [System.Serializable]
-        public struct PickedCardEntry
+        public class PickedCardEntry
         {
-            /// <summary>カードデータ</summary>
             public CardData Card;
-
-            /// <summary>枚数</summary>
             public int Count;
 
-            /// <summary>
-            /// コンストラクタ
-            /// </summary>
             public PickedCardEntry(CardData card, int count)
             {
                 Card = card;
@@ -98,6 +92,18 @@ namespace CardGame.DeckSystem.Manager
         /// </summary>
         public List<PickedCardEntry> GetPickedCardEntries()
         {
+            // リスト内容をデバッグ出力
+            Debug.Log("[GetPickedCardEntries] 現在のピック済みカードリスト:");
+            for (int i = 0; i < _pickedCards.Count; i++)
+            {
+                PickedCardEntry entry = _pickedCards[i];
+                string cardName = entry.Card != null ? entry.Card.CardName : "null";
+                int cost = entry.Card != null ? entry.Card.CardCost : -1;
+                int count = entry.Count;
+
+                Debug.Log($"[{i}] {cardName}  (Cost={cost}, Count={count})");
+            }
+
             return _pickedCards;
         }
 
@@ -167,13 +173,6 @@ namespace CardGame.DeckSystem.Manager
                 return;
             }
 
-            // 並び替え前の確認ログ
-            Debug.Log("[SortPickedCards] ソート前:");
-            foreach (var e in _pickedCards)
-            {
-                Debug.Log($"  {e.Card.CardName}  (Cost={e.Card.CardCost}, ID={e.Card.CardId})");
-            }
-
             // --------------------------------------------
             // 第1条件：コスト昇順、第2条件：CardID昇順
             // --------------------------------------------
@@ -186,13 +185,6 @@ namespace CardGame.DeckSystem.Manager
                 }
                 return a.Card.CardId.CompareTo(b.Card.CardId);
             });
-
-            // 並び替え後の確認ログ
-            Debug.Log("[SortPickedCards] ソート後:");
-            foreach (var e in _pickedCards)
-            {
-                Debug.Log($"  {e.Card.CardName}  (Cost={e.Card.CardCost}, ID={e.Card.CardId})");
-            }
         }
     }
 }

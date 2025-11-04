@@ -202,9 +202,6 @@ namespace CardGame.UISystem.Manager
             // ピック済みカードの一覧を取得する
             List<DeckListManager.PickedCardEntry> pickedEntries = DeckListManager.Instance.GetPickedCardEntries();
 
-            // ID順でソートして表示順を安定化させる
-            pickedEntries.Sort((a, b) => a.Card.CardId.CompareTo(b.Card.CardId));
-
             // 既存表示をすべて非表示化して hiddenParent へ退避する
             ClearDisplay();
 
