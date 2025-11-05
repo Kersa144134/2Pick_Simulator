@@ -92,16 +92,13 @@ namespace CardGame.UISystem.Manager
         // UnityƒCƒxƒ“ƒg
         // ======================================================
 
-        private void Awake()
+        private void Start()
         {
             InitializeCardData();
             GenerateAllCardObjects();
 
             _scrollController = new CardScrollController(upRowRoot, scrollMoveSpeed);
-        }
-
-        private void Start()
-        {
+            
             RefreshDeckDisplay();
         }
 

@@ -141,11 +141,11 @@ namespace CardGame.CardSystem.Data
         }
 
         // --------------------------------------------------
-        // グループ操作（提示可フラグ）
+        // グループ操作
         // --------------------------------------------------
 
         /// <summary>
-        /// 特定パックのカード全ての提示可能フラグを一括変更する
+        /// 特定パックのカード全ての提示可能枚数を一括変更する
         /// </summary>
         public void SetAvailableByPack(int packNumber, int newValue)
         {
@@ -159,7 +159,7 @@ namespace CardGame.CardSystem.Data
         }
 
         /// <summary>
-        /// 特定レアリティのカード全ての提示可能フラグを一括変更する
+        /// 特定レアリティのカード全ての提示可能枚数を一括変更する
         /// </summary>
         public void SetAvailableByRarity(CardData.CardRarity rarity, int newValue)
         {
@@ -173,7 +173,7 @@ namespace CardGame.CardSystem.Data
         }
 
         /// <summary>
-        /// 特定コストのカード全ての提示可能フラグを一括変更する
+        /// 特定コストのカード全ての提示可能枚数を一括変更する
         /// </summary>
         public void SetAvailableByCost(int cost, int newValue)
         {

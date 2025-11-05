@@ -1,10 +1,11 @@
 // ======================================================
 // CardButtonManager.cs
-// 作成者 : 高橋一翔
-// 作成日時 : 2025-10-31
-// 更新日時 : 2025-10-31
-// 概要 : カードフィルタボタン（クラス・パック・レアリティ・コスト）を管理
-// ボタン押下による状態変更を統合し、カード表示/非表示更新を通知
+// 作成者     : 高橋一翔
+// 作成日時   : 2025-10-31
+// 更新日時   : 2025-11-05
+// 概要       : カードフィルタボタン（クラス・パック・レアリティ・コスト）を管理
+//              ボタン押下による状態変更を統合し、カード表示/非表示更新および
+//              提示可能枚数制御を行う
 // ======================================================
 
 using System;
@@ -12,6 +13,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 using CardGame.CardSystem.Data;
+using CardGame.CardSystem.Manager;
 using CardGame.CardSystem.Utility;
 using static CardGame.CardSystem.Data.CardData;
 
@@ -26,19 +28,19 @@ namespace CardGame.UISystem.Controller
         /// <summary>ボタン押下時の色</summary>
         public Color OnColor;
 
-        /// <summary>ボタン非押下時の色</summary>  
+        /// <summary>ボタン非押下時の色</summary>
         public Color OffColor;
     }
 
-    /// <summary>  
-    /// ジェネリックなカードフィルタボタンの基底クラス  
-    /// </summary>  
-    /// <typeparam name="T">フィルタ対象の値（クラス、パック、レアリティ、コスト）</typeparam>  
+    /// <summary>
+    /// ジェネリックなカードフィルタボタンの基底クラス
+    /// </summary>
+    /// <typeparam name="T">フィルタ対象の値（クラス、パック、レアリティ、コスト）</typeparam>
     public class CardFilterButton<T>
     {
-        // ======================================================  
-        // フィールド  
-        // ======================================================  
+        // ======================================================
+        // フィールド
+        // ======================================================
 
         /// <summary>対象となるUIボタンコンポーネント</summary>
         protected Button _button;
@@ -49,32 +51,30 @@ namespace CardGame.UISystem.Controller
         /// <summary>現在のボタン押下状態（オン＝true、オフ＝false）</summary>
         protected bool _isActive;
 
-        // ======================================================  
-        // プロパティ  
-        // ======================================================  
+        // ======================================================
+        // プロパティ
+        // ======================================================
 
-        /// <summary>ボタンの現在押下状態</summary>  
+        /// <summary>ボタンの現在押下状態</summary>
         public bool IsActive => _isActive;
 
-        /// <summary>このボタンが保持するフィルタ値</summary>  
+        /// <summary>このボタンが保持するフィルタ値</summary>
         public T FilterValue { get; protected set; }
 
-        // ======================================================  
-        // イベント  
-        // ======================================================  
+        // ======================================================
+        // イベント
+        // ======================================================
 
-        /// <summary>ボタン押下時に状態が変化した際に通知されるイベント</summary>  
+        /// <summary>ボタン押下時に状態が変化した際に通知されるイベント</summary>
         public event Action<CardFilterButton<T>> OnFilterToggled;
 
-        // ======================================================  
-        // コンストラクタ  
-        // ======================================================  
+        // ======================================================
+        // コンストラクタ
+        // ======================================================
 
-        /// <summary>コンストラクタ：ボタン初期化、クリックイベント登録</summary>  
-        /// <param name="button">対象Button</param>  
-        /// <param name="colorSettings">オン／オフ色設定</param>  
-        /// <param name="value">このボタンのフィルタ値</param>  
-        /// <param name="defaultOn">初期状態をオンにするか</param>  
+        /// <summary>
+        /// コンストラクタ：ボタン初期化、クリックイベント登録
+        /// </summary>
         public CardFilterButton(Button button, ButtonColorSettings colorSettings, T value, bool defaultOn)
         {
             _button = button;
@@ -85,7 +85,10 @@ namespace CardGame.UISystem.Controller
             if (_button != null)
             {
                 Image img = _button.GetComponent<Image>();
-                if (img != null) img.color = _isActive ? _colorSettings.OnColor : _colorSettings.OffColor;
+                if (img != null)
+                {
+                    img.color = _isActive ? _colorSettings.OnColor : _colorSettings.OffColor;
+                }
 
                 _button.onClick.AddListener(() =>
                 {
@@ -95,92 +98,164 @@ namespace CardGame.UISystem.Controller
             }
         }
 
-        // ======================================================  
-        // パブリックメソッド  
-        // ======================================================  
+        // ======================================================
+        // パブリックメソッド
+        // ======================================================
 
-        /// <summary>ボタン押下時にオン／オフ色を切り替える</summary>  
+        /// <summary>
+        /// ボタン押下時にオン／オフ色を切り替える
+        /// </summary>
         public void ToggleColor()
         {
             _isActive = !_isActive;
 
             Image img = _button?.GetComponent<Image>();
-            if (img != null) img.color = _isActive ? _colorSettings.OnColor : _colorSettings.OffColor;
+            if (img != null)
+            {
+                img.color = _isActive ? _colorSettings.OnColor : _colorSettings.OffColor;
+            }
         }
     }
 
-    /// <summary>カードクラス用フィルタボタン</summary>  
+    /// <summary>カードクラス用フィルタボタン</summary>
     public class CardClassButton : CardFilterButton<CardClass>
     {
         public CardClassButton(Button button, ButtonColorSettings colorSettings, CardClass value, bool defaultOn)
-            : base(button, colorSettings, value, defaultOn)
-        { }
+            : base(button, colorSettings, value, defaultOn) { }
     }
 
-    /// <summary>カードパック用フィルタボタン</summary>  
+    /// <summary>カードパック用フィルタボタン</summary>
     public class CardPackButton : CardFilterButton<int>
     {
         public CardPackButton(Button button, ButtonColorSettings colorSettings, int value, bool defaultOn)
-            : base(button, colorSettings, value, defaultOn)
-        { }
+            : base(button, colorSettings, value, defaultOn) { }
     }
 
-    /// <summary>カードレアリティ用フィルタボタン</summary>  
+    /// <summary>カードレアリティ用フィルタボタン</summary>
     public class CardRarityButton : CardFilterButton<CardRarity>
     {
         public CardRarityButton(Button button, ButtonColorSettings colorSettings, CardRarity value, bool defaultOn)
-            : base(button, colorSettings, value, defaultOn)
-        { }
+            : base(button, colorSettings, value, defaultOn) { }
     }
 
-    /// <summary>カードコスト用フィルタボタン</summary>  
+    /// <summary>カードコスト用フィルタボタン</summary>
     public class CardCostButton : CardFilterButton<int>
     {
         public CardCostButton(Button button, ButtonColorSettings colorSettings, int value, bool defaultOn)
-            : base(button, colorSettings, value, defaultOn)
-        { }
+            : base(button, colorSettings, value, defaultOn) { }
     }
 
-    /// <summary>複数カードフィルタボタンを統合管理するクラス</summary>  
+    // ======================================================
+    // メインクラス：カードフィルタ・提示枚数管理
+    // ======================================================
+
     public class CardButtonManager
     {
-        // ======================================================  
-        // フィールド  
-        // ======================================================  
+        // ======================================================
+        // 定数
+        // ======================================================
 
-        private readonly CardVisibilityController _visibilityController;
+        /// <summary>カード1種あたりの最大提示可能枚数</summary>
+        private const int MAX_AVAILABLE_COUNT = 3;
+
+        // ======================================================
+        // フィールド
+        // ======================================================
+
+        /// <summary>カードデータベース参照</summary>
+        private readonly CardDatabase _database;
+
+        /// <summary>カードロードヘルパー</summary>
         private readonly CardDataLoader _loader;
 
-        /// <summary>カードクラスボタンリスト</summary>  
-        public List<CardClassButton> ClassButtons { get; private set; } = new List<CardClassButton>();
+        /// <summary>カード可視制御コンポーネント</summary>
+        private readonly CardVisibilityController _visibilityController;
 
-        /// <summary>カードパックボタンリスト</summary>  
-        public List<CardPackButton> PackButtons { get; private set; } = new List<CardPackButton>();
+        /// <summary>クラスボタンリスト</summary>
+        public List<CardClassButton> ClassButtons = new List<CardClassButton>();
 
-        /// <summary>カードレアリティボタンリスト</summary>  
-        public List<CardRarityButton> RarityButtons { get; private set; } = new List<CardRarityButton>();
+        /// <summary>パックボタンリスト</summary>
+        public List<CardPackButton> PackButtons = new List<CardPackButton>();
 
-        /// <summary>カードコストボタンリスト</summary>  
-        public List<CardCostButton> CostButtons { get; private set; } = new List<CardCostButton>();
+        /// <summary>レアリティボタンリスト</summary>
+        public List<CardRarityButton> RarityButtons = new List<CardRarityButton>();
 
-        // ======================================================  
-        // イベント  
-        // ======================================================  
+        /// <summary>コストボタンリスト</summary>
+        public List<CardCostButton> CostButtons = new List<CardCostButton>();
 
-        /// <summary>カード表示更新時に通知されるイベント</summary>  
+        /// <summary>パックごとの提示枚数</summary>
+        private readonly Dictionary<int, int> _packAvailableCounts = new Dictionary<int, int>();
+
+        /// <summary>レアリティごとの提示枚数</summary>
+        private readonly Dictionary<CardRarity, int> _rarityAvailableCounts = new Dictionary<CardRarity, int>();
+
+        /// <summary>コストごとの提示枚数</summary>
+        private readonly Dictionary<int, int> _costAvailableCounts = new Dictionary<int, int>();
+
+        // ======================================================
+        // プロパティ
+        // ======================================================
+
+        /// <summary>
+        /// 全パックの提示可能枚数辞書を取得する（読み取り専用）
+        /// </summary>
+        public IReadOnlyDictionary<int, int> GetAllPackAvailableCounts()
+        {
+            // null対策と安全な参照渡し
+            if (_packAvailableCounts == null)
+            {
+                return new Dictionary<int, int>();
+            }
+
+            // DictionaryはIReadOnlyDictionaryとしてキャスト可能
+            return _packAvailableCounts;
+        }
+
+        /// <summary>
+        /// 全レアリティの提示可能枚数辞書を取得する（読み取り専用）
+        /// </summary>
+        public IReadOnlyDictionary<CardRarity, int> GetAllRarityAvailableCounts()
+        {
+            if (_rarityAvailableCounts == null)
+            {
+                return new Dictionary<CardRarity, int>();
+            }
+
+            return _rarityAvailableCounts;
+        }
+
+        /// <summary>
+        /// 全コストの提示可能枚数辞書を取得する（読み取り専用）
+        /// </summary>
+        public IReadOnlyDictionary<int, int> GetAllCostAvailableCounts()
+        {
+            if (_costAvailableCounts == null)
+            {
+                return new Dictionary<int, int>();
+            }
+
+            return _costAvailableCounts;
+        }
+
+        // ======================================================
+        // イベント
+        // ======================================================
+
+        /// <summary>カード表示更新時に通知されるイベント</summary>
         public event Action OnCardsUpdated;
 
-        // ======================================================  
-        // コンストラクタ  
-        // ======================================================  
+        // ======================================================
+        // コンストラクタ
+        // ======================================================
 
-        /// <summary>CardButtonManager初期化</summary>  
-        /// <param name="visibilityController">表示／非表示管理クラス</param>  
-        /// <param name="loader">CardDataロードクラス</param>  
-        public CardButtonManager(CardVisibilityController visibilityController, CardDataLoader loader)
+        /// <summary>
+        /// コンストラクタ
+        /// </summary>
+        public CardButtonManager(CardVisibilityController visibilityController, CardDatabase database)
         {
             _visibilityController = visibilityController;
-            _loader = loader;
+            _database = database;
+            _loader = CardDatabaseManager.Instance.GetCardDataLoader();
         }
 
         // ======================================================  
@@ -215,16 +290,23 @@ namespace CardGame.UISystem.Controller
             CostButtons.Add(button);
             button.OnFilterToggled += ApplyFilters;
         }
+        
+        // ======================================================
+        // フィルタ適用処理
+        // ======================================================
 
-        // ======================================================  
-        // フィルタ適用処理  
-        // ======================================================  
-
-        /// <summary>全ボタンのフィルタを適用し表示/非表示を更新</summary>  
-        /// <typeparam name="T">押下されたボタンの型</typeparam>  
-        /// <param name="changedButton">押下されたボタン</param>  
+        /// <summary>
+        /// 全ボタンのフィルタを適用し表示/非表示を更新
+        /// </summary>
+        /// <typeparam name="T">押下されたボタンの型</typeparam>
+        /// <param name="changedButton">押下されたボタン</param>
         private void ApplyFilters<T>(CardFilterButton<T> changedButton)
         {
+            if (_loader == null || _visibilityController == null)
+            {
+                return;
+            }
+
             // まず全カードをベースにリスト作成
             List<CardData> filteredCards = new List<CardData>(_loader.AllCardData);
 
@@ -259,19 +341,18 @@ namespace CardGame.UISystem.Controller
             // コストフィルタ適用
             // --------------------------------------------------
             List<CardCostButton> activeCostButtons = CostButtons.FindAll(b => b.IsActive);
-
             if (activeCostButtons.Count > 0)
             {
                 filteredCards = filteredCards.FindAll(cd =>
                 {
                     foreach (CardCostButton b in activeCostButtons)
                     {
-                        // ボタンの値が10なら、カードコストが10以上を対象
+                        // ボタン値が10ならコスト10以上
                         if (b.FilterValue == 10 && cd.CardCost >= 10)
                         {
                             return true;
                         }
-                        // それ以外は通常の一致判定
+                        // 通常一致
                         else if (cd.CardCost == b.FilterValue)
                         {
                             return true;
@@ -287,6 +368,83 @@ namespace CardGame.UISystem.Controller
             _visibilityController.HideAll();
             _visibilityController.ShowCards(filteredCards);
 
+            OnCardsUpdated?.Invoke();
+        }
+
+        // ======================================================
+        // 提示枚数制御共通ヘルパー
+        // ======================================================
+
+        /// <summary>
+        /// 指定辞書の値を更新し、上限3・下限0にクランプして返す
+        /// </summary>
+        private int UpdateAvailableCount<TKey>(Dictionary<TKey, int> dict, TKey key, int delta)
+        {
+            int currentValue = MAX_AVAILABLE_COUNT;
+            if (dict.ContainsKey(key))
+            {
+                currentValue = dict[key];
+            }
+
+            int newValue = Mathf.Clamp(currentValue + delta, 0, MAX_AVAILABLE_COUNT);
+            dict[key] = newValue;
+            return newValue;
+        }
+
+        // ======================================================
+        // 一括操作：パック
+        // ======================================================
+
+        /// <summary>
+        /// 特定パックの提示可能枚数を増減させる
+        /// </summary>
+        public void SetAvailableByPack(int packNumber, int delta)
+        {
+            if (_database == null)
+            {
+                return;
+            }
+
+            int newValue = UpdateAvailableCount(_packAvailableCounts, packNumber, delta);
+            _database.SetAvailableByPack(packNumber, newValue);
+            OnCardsUpdated?.Invoke();
+        }
+
+        // ======================================================
+        // 一括操作：レアリティ
+        // ======================================================
+
+        /// <summary>
+        /// 特定レアリティの提示可能枚数を増減させる
+        /// </summary>
+        public void SetAvailableByRarity(CardRarity rarity, int delta)
+        {
+            if (_database == null)
+            {
+                return;
+            }
+
+            int newValue = UpdateAvailableCount(_rarityAvailableCounts, rarity, delta);
+            _database.SetAvailableByRarity(rarity, newValue);
+            OnCardsUpdated?.Invoke();
+        }
+
+        // ======================================================
+        // 一括操作：コスト
+        // ======================================================
+
+        /// <summary>
+        /// 特定コストの提示可能枚数を増減させる
+        /// </summary>
+        public void SetAvailableByCost(int cost, int delta)
+        {
+            if (_database == null)
+            {
+                return;
+            }
+
+            int newValue = UpdateAvailableCount(_costAvailableCounts, cost, delta);
+            _database.SetAvailableByCost(cost, newValue);
             OnCardsUpdated?.Invoke();
         }
     }

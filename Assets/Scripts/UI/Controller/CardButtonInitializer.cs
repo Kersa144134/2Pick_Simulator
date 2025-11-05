@@ -1,49 +1,51 @@
-// ======================================================
+﻿// ======================================================
 // CardButtonInitializer.cs
-// �쐬��     : ��������
-// �쐬����   : 2025-11-03
-// �X�V����   : 2025-11-03
-// �T�v       : �e��J�[�h�{�^���i�N���X�E�p�b�N�E���A���e�B�E�R�X�g�j��
-//             ���������ACardButtonManager�֓o�^���鏉������p�N���X
+// 作成者     : 高橋一翔
+// 作成日時   : 2025-11-05
+// 更新日時   : 2025-11-05
+// 概要       : 各種カードボタン（フィルター・Deckable）を初期化し
+//             CardButtonManagerへ登録する初期化専用クラス
 // ======================================================
 
-using System;
-using UnityEngine;
 using CardGame.UISystem.Controller;
 using CardGame.UISystem.Manager;
+using System;
+using System.Collections.Generic;
+using static CardGame.CardSystem.Data.CardData;
+using static CardGame.UISystem.Manager.OptionDisplayManager;
 
 namespace CardGame.UISystem.Initializer
 {
     /// <summary>
-    /// �J�[�h�֘A�{�^�����ꊇ����������⏕�N���X  
-    /// �{�^���z����󂯎��ACardButtonManager�ւ̓o�^�ƃC�x���g�ݒ���s��
+    /// カード関連ボタンを一括初期化する補助クラス  
+    /// フィルター用・Deckable用ボタンを登録し、押下時に表示や枚数を更新
     /// </summary>
     public class CardButtonInitializer
     {
         // ======================================================
-        // �t�B�[���h
+        // フィールド
         // ======================================================
 
-        /// <summary>�{�^����Ԃ𓝊��Ǘ�����}�l�[�W��</summary>
+        /// <summary>ボタン状態を統括管理するマネージャ</summary>
         private readonly CardButtonManager _buttonManager;
 
-        /// <summary>�J�[�h����Ԃ𐧌䂷��N���X</summary>
+        /// <summary>カード可視状態を制御するクラス</summary>
         private readonly CardVisibilityController _visibilityController;
 
-        /// <summary>�{�^���X�V��ɌĂяo���O���X�V�����i�J�[�h�ĕ`��j</summary>
+        /// <summary>ボタン更新後に呼び出す外部更新処理（カード再描画）</summary>
         private readonly Action _onButtonUpdate;
 
         // ======================================================
-        // �R���X�g���N�^
+        // コンストラクタ
         // ======================================================
 
         /// <summary>
-        /// CardButtonInitializer�𐶐�  
-        /// Manager�ƃC�x���g���O�����璍�����Ĉꌳ������
+        /// CardButtonInitializerを生成  
+        /// Managerとイベントを外部から注入して一元化する
         /// </summary>
         /// <param name="manager">CardButtonManager</param>
-        /// <param name="visibilityController">�J�[�h�\���Ǘ��N���X</param>
-        /// <param name="onUpdate">�{�^���N���b�N��Ɏ��s����X�V����</param>
+        /// <param name="visibilityController">カード表示管理クラス</param>
+        /// <param name="onUpdate">ボタンクリック後に実行する更新処理</param>
         public CardButtonInitializer(
             CardButtonManager manager,
             CardVisibilityController visibilityController,
@@ -56,22 +58,20 @@ namespace CardGame.UISystem.Initializer
         }
 
         // ======================================================
-        // �p�u���b�N���\�b�h
+        // フィルター用ボタン初期化
         // ======================================================
 
         /// <summary>
-        /// �N���X�{�^����������
+        /// クラスフィルターボタンを初期化してCardButtonManagerに登録する
         /// </summary>
-        public void InitializeClassButtons(OptionDisplayManager.CardFilterButtonInfo[] classButtons)
+        /// <param name="classButtons">初期化対象のクラスボタン配列</param>
+        public void InitializeFilterClassButtons(OptionDisplayManager.CardFilterButtonInfo[] classButtons)
         {
-            if (classButtons == null || classButtons.Length == 0)
-            {
-                Debug.LogWarning("classButtons �����ݒ�ł��BInspector�Ŋ��蓖�ĂĂ��������B");
-                return;
-            }
+            if (classButtons == null || classButtons.Length == 0) return;
 
-            foreach (OptionDisplayManager.CardFilterButtonInfo cb in classButtons)
+            for (int i = 0; i < classButtons.Length; i++)
             {
+                OptionDisplayManager.CardFilterButtonInfo cb = classButtons[i];
                 if (cb.Button == null) continue;
 
                 CardClassButton btn = new CardClassButton(
@@ -81,20 +81,21 @@ namespace CardGame.UISystem.Initializer
                     cb.DefaultOn
                 );
                 _buttonManager.RegisterClassButton(btn);
-
                 cb.Button.onClick.AddListener(() => _onButtonUpdate?.Invoke());
             }
         }
 
         /// <summary>
-        /// �p�b�N�{�^����������
+        /// パックフィルターボタンを初期化してCardButtonManagerに登録する
         /// </summary>
-        public void InitializePackButtons(OptionDisplayManager.CardFilterButtonInfo[] packButtons)
+        /// <param name="packButtons">初期化対象のパックボタン配列</param>
+        public void InitializeFilterPackButtons(OptionDisplayManager.CardFilterButtonInfo[] packButtons)
         {
             if (packButtons == null || packButtons.Length == 0) return;
 
-            foreach (OptionDisplayManager.CardFilterButtonInfo pb in packButtons)
+            for (int i = 0; i < packButtons.Length; i++)
             {
+                OptionDisplayManager.CardFilterButtonInfo pb = packButtons[i];
                 if (pb.Button == null) continue;
 
                 CardPackButton btn = new CardPackButton(
@@ -104,20 +105,21 @@ namespace CardGame.UISystem.Initializer
                     pb.DefaultOn
                 );
                 _buttonManager.RegisterPackButton(btn);
-
                 pb.Button.onClick.AddListener(() => _onButtonUpdate?.Invoke());
             }
         }
 
         /// <summary>
-        /// ���A���e�B�{�^����������
+        /// レアリティフィルターボタンを初期化してCardButtonManagerに登録する
         /// </summary>
-        public void InitializeRarityButtons(OptionDisplayManager.CardFilterButtonInfo[] rarityButtons)
+        /// <param name="rarityButtons">初期化対象のレアリティボタン配列</param>
+        public void InitializeFilterRarityButtons(OptionDisplayManager.CardFilterButtonInfo[] rarityButtons)
         {
             if (rarityButtons == null || rarityButtons.Length == 0) return;
 
-            foreach (OptionDisplayManager.CardFilterButtonInfo rb in rarityButtons)
+            for (int i = 0; i < rarityButtons.Length; i++)
             {
+                OptionDisplayManager.CardFilterButtonInfo rb = rarityButtons[i];
                 if (rb.Button == null) continue;
 
                 CardRarityButton btn = new CardRarityButton(
@@ -127,20 +129,21 @@ namespace CardGame.UISystem.Initializer
                     rb.DefaultOn
                 );
                 _buttonManager.RegisterRarityButton(btn);
-
                 rb.Button.onClick.AddListener(() => _onButtonUpdate?.Invoke());
             }
         }
 
         /// <summary>
-        /// �R�X�g�{�^����������
+        /// コストフィルターボタンを初期化してCardButtonManagerに登録する
         /// </summary>
-        public void InitializeCostButtons(OptionDisplayManager.CardFilterButtonInfo[] costButtons)
+        /// <param name="costButtons">初期化対象のコストボタン配列</param>
+        public void InitializeFilterCostButtons(OptionDisplayManager.CardFilterButtonInfo[] costButtons)
         {
             if (costButtons == null || costButtons.Length == 0) return;
 
-            foreach (OptionDisplayManager.CardFilterButtonInfo cb in costButtons)
+            for (int i = 0; i < costButtons.Length; i++)
             {
+                OptionDisplayManager.CardFilterButtonInfo cb = costButtons[i];
                 if (cb.Button == null) continue;
 
                 CardCostButton btn = new CardCostButton(
@@ -150,25 +153,248 @@ namespace CardGame.UISystem.Initializer
                     cb.DefaultOn
                 );
                 _buttonManager.RegisterCostButton(btn);
-
                 cb.Button.onClick.AddListener(() => _onButtonUpdate?.Invoke());
             }
         }
 
+        // ======================================================
+        // Deckable一括変更ボタン初期化
+        // ======================================================
+
         /// <summary>
-        /// ���ׂẴ{�^�����ꊇ������
+        /// Deckableボタンを初期化（Plus/Minusボタンと枚数Text）  
+        /// 対象はパック・レアリティ・コスト
+        /// </summary>
+        /// <param name="deckableButtons">初期化対象のDeckableボタン配列</param>
+        public void InitializeDeckableButtons(DeckableButtonInfo[] deckableButtons)
+        {
+            // Nullチェックと要素数確認
+            if (deckableButtons == null || deckableButtons.Length == 0)
+            {
+                return;
+            }
+
+            // 各Deckableボタンに対して初期化処理を実行
+            for (int i = 0; i < deckableButtons.Length; i++)
+            {
+                DeckableButtonInfo db = deckableButtons[i];
+
+                // どちらのボタンも未設定の場合はスキップ
+                if (db.PlusButton == null && db.MinusButton == null)
+                {
+                    continue;
+                }
+
+                // --------------------------------------------------
+                // ＋ボタン押下時処理
+                // --------------------------------------------------
+                if (db.PlusButton != null)
+                {
+                    db.PlusButton.onClick.AddListener(() =>
+                    {
+                        // タイプに応じて増加処理
+                        switch (db.TargetType)
+                        {
+                            case TargetEnum.Pack:
+                                _buttonManager.SetAvailableByPack(db.Value.PackId, 1);
+                                break;
+
+                            case TargetEnum.Rarity:
+                                _buttonManager.SetAvailableByRarity(db.Value.Rarity, 1);
+                                break;
+
+                            case TargetEnum.Cost:
+                                _buttonManager.SetAvailableByCost(db.Value.Cost, 1);
+                                break;
+
+                            default:
+                                return;
+                        }
+
+                        // 表示更新
+                        UpdateDeckableCountText(db);
+                        _onButtonUpdate?.Invoke();
+                    });
+                }
+
+                // --------------------------------------------------
+                // −ボタン押下時処理
+                // --------------------------------------------------
+                if (db.MinusButton != null)
+                {
+                    db.MinusButton.onClick.AddListener(() =>
+                    {
+                        // タイプに応じて減算処理
+                        switch (db.TargetType)
+                        {
+                            case TargetEnum.Pack:
+                                _buttonManager.SetAvailableByPack(db.Value.PackId, -1);
+                                break;
+
+                            case TargetEnum.Rarity:
+                                _buttonManager.SetAvailableByRarity(db.Value.Rarity, -1);
+                                break;
+
+                            case TargetEnum.Cost:
+                                _buttonManager.SetAvailableByCost(db.Value.Cost, -1);
+                                break;
+
+                            default:
+                                return;
+                        }
+
+                        // 表示更新
+                        UpdateDeckableCountText(db);
+                        _onButtonUpdate?.Invoke();
+                    });
+                }
+
+                // --------------------------------------------------
+                // 初期表示更新
+                // --------------------------------------------------
+                if (db.CountText != null)
+                {
+                    UpdateDeckableCountText(db);
+                }
+            }
+        }
+
+        /// <summary>
+        /// Deckableボタンに対応するCountTextを最新状態に更新する（デバッグログ付き）
+        /// </summary>
+        /// <param name="db">更新対象の DeckableButtonInfo（単体）</param>
+        private void UpdateDeckableCountText(DeckableButtonInfo db)
+        {
+            // 引数チェック：nullや表示対象Textが無ければ処理不要
+            if (db == null || db.CountText == null)
+            {
+                UnityEngine.Debug.LogWarning("[DeckableCount] db または CountText が null のため更新スキップ");
+                return;
+            }
+
+            UnityEngine.Debug.Log($"[DeckableCount] 更新開始: Target={db.TargetType}");
+
+            // CardButtonManager 側に用意した全件取得メソッドを呼び出す。
+            // 存在しないケースに備え、null合体で空辞書を安全に用意する。
+            IReadOnlyDictionary<int, int> packCounts = null;
+            IReadOnlyDictionary<CardRarity, int> rarityCounts = null;
+            IReadOnlyDictionary<int, int> costCounts = null;
+
+            try
+            {
+                packCounts = _buttonManager.GetAllPackAvailableCounts();
+                UnityEngine.Debug.Log($"[DeckableCount] Pack辞書取得成功（要素数={packCounts?.Count ?? 0}）");
+            }
+            catch (Exception e)
+            {
+                UnityEngine.Debug.LogWarning($"[DeckableCount] Pack辞書取得失敗: {e.Message}");
+                packCounts = new Dictionary<int, int>();
+            }
+
+            try
+            {
+                rarityCounts = _buttonManager.GetAllRarityAvailableCounts();
+                UnityEngine.Debug.Log($"[DeckableCount] Rarity辞書取得成功（要素数={rarityCounts?.Count ?? 0}）");
+            }
+            catch (Exception e)
+            {
+                UnityEngine.Debug.LogWarning($"[DeckableCount] Rarity辞書取得失敗: {e.Message}");
+                rarityCounts = new Dictionary<CardRarity, int>();
+            }
+
+            try
+            {
+                costCounts = _buttonManager.GetAllCostAvailableCounts();
+                UnityEngine.Debug.Log($"[DeckableCount] Cost辞書取得成功（要素数={costCounts?.Count ?? 0}）");
+            }
+            catch (Exception e)
+            {
+                UnityEngine.Debug.LogWarning($"[DeckableCount] Cost辞書取得失敗: {e.Message}");
+                costCounts = new Dictionary<int, int>();
+            }
+
+            // --------------------------------------------------
+            // 対象タイプに応じてカウントを取得
+            // --------------------------------------------------
+            int current = 0;
+
+            switch (db.TargetType)
+            {
+                case TargetEnum.Pack:
+                    if (db.Value != null && packCounts.ContainsKey(db.Value.PackId))
+                    {
+                        current = packCounts[db.Value.PackId];
+                        UnityEngine.Debug.Log($"[DeckableCount] PackId={db.Value.PackId} → Count={current}");
+                    }
+                    else
+                    {
+                        UnityEngine.Debug.LogWarning($"[DeckableCount] PackId={db?.Value?.PackId} 未登録または辞書なし");
+                    }
+                    break;
+
+                case TargetEnum.Rarity:
+                    if (db.Value != null && rarityCounts.ContainsKey(db.Value.Rarity))
+                    {
+                        current = rarityCounts[db.Value.Rarity];
+                        UnityEngine.Debug.Log($"[DeckableCount] Rarity={db.Value.Rarity} → Count={current}");
+                    }
+                    else
+                    {
+                        UnityEngine.Debug.LogWarning($"[DeckableCount] Rarity={db?.Value?.Rarity} 未登録または辞書なし");
+                    }
+                    break;
+
+                case TargetEnum.Cost:
+                    if (db.Value != null && costCounts.ContainsKey(db.Value.Cost))
+                    {
+                        current = costCounts[db.Value.Cost];
+                        UnityEngine.Debug.Log($"[DeckableCount] Cost={db.Value.Cost} → Count={current}");
+                    }
+                    else
+                    {
+                        UnityEngine.Debug.LogWarning($"[DeckableCount] Cost={db?.Value?.Cost} 未登録または辞書なし");
+                    }
+                    break;
+
+                default:
+                    UnityEngine.Debug.LogWarning($"[DeckableCount] 未定義TargetType: {db.TargetType}");
+                    current = 0;
+                    break;
+            }
+
+            // --------------------------------------------------
+            // テキスト反映（存在しない場合は "0" 表示）
+            // --------------------------------------------------
+            db.CountText.text = current.ToString();
+            UnityEngine.Debug.Log($"[DeckableCount] テキスト更新完了 → {current}");
+        }
+
+
+        // ======================================================
+        // 一括初期化
+        // ======================================================
+
+        /// <summary>
+        /// フィルター用ボタンとDeckable用ボタンをまとめて初期化する
         /// </summary>
         public void InitializeAll(
             OptionDisplayManager.CardFilterButtonInfo[] classButtons,
             OptionDisplayManager.CardFilterButtonInfo[] packButtons,
             OptionDisplayManager.CardFilterButtonInfo[] rarityButtons,
-            OptionDisplayManager.CardFilterButtonInfo[] costButtons
+            OptionDisplayManager.CardFilterButtonInfo[] costButtons,
+            OptionDisplayManager.DeckableButtonInfo[] packDeckables,
+            OptionDisplayManager.DeckableButtonInfo[] rarityDeckables,
+            OptionDisplayManager.DeckableButtonInfo[] costDeckables
         )
         {
-            InitializeClassButtons(classButtons);
-            InitializePackButtons(packButtons);
-            InitializeRarityButtons(rarityButtons);
-            InitializeCostButtons(costButtons);
+            InitializeFilterClassButtons(classButtons);
+            InitializeFilterPackButtons(packButtons);
+            InitializeFilterRarityButtons(rarityButtons);
+            InitializeFilterCostButtons(costButtons);
+
+            InitializeDeckableButtons(packDeckables);
+            InitializeDeckableButtons(rarityDeckables);
+            InitializeDeckableButtons(costDeckables);
         }
     }
 }
