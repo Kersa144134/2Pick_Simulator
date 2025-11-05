@@ -41,6 +41,10 @@ namespace CardGame.GameSystem.Manager
         /// <summary>フィルター用オブジェクト群（表示ON/OFF対象）</summary>
         private GameObject[] filterGroup;
 
+        [SerializeField]
+        /// <summary>一括変更用オブジェクト群（表示ON/OFF対象）</summary>
+        private GameObject[] massChangeGroup;
+
         [Header("ボタン設定")]
         [SerializeField]
         /// <summary>Startボタン</summary>
@@ -58,12 +62,19 @@ namespace CardGame.GameSystem.Manager
         /// <summary>Filterボタン</summary>
         private Button filterButton;
 
+        [SerializeField]
+        /// <summary>MassChangeボタン</summary>
+        private Button massChangeButton;
+
         // ======================================================
         // フィールド
         // ======================================================
 
         /// <summary>フィルターグループが現在表示中かどうかを示すフラグ</summary>
         private bool _isFilterActive = false;
+
+        /// <summary>一括変更グループが現在表示中かどうかを示すフラグ</summary>
+        private bool _isMassChangeActive = false;
 
         // ======================================================
         // Unityイベント
@@ -84,11 +95,11 @@ namespace CardGame.GameSystem.Manager
             // FILTERボタン押下イベント登録
             filterButton.onClick.AddListener(OnFilterButtonClicked);
 
+            // MASSCHANGEボタン押下イベント登録
+            massChangeButton.onClick.AddListener(OnMassChangeButtonClicked);
+
             // OPTIONキャンバス用戻るボタン押下イベント登録
-            if (optionBackButton != null)
-            {
-                optionBackButton.onClick.AddListener(OnOptionBackButtonClicked);
-            }
+            optionBackButton.onClick.AddListener(OnOptionBackButtonClicked);
 
             // 起動時はタイトル画面のみ表示
             if (titleCanvas != null)
@@ -152,19 +163,6 @@ namespace CardGame.GameSystem.Manager
         }
 
         /// <summary>
-        /// FILTERボタン押下時処理  
-        /// filterGroup 内の全オブジェクトを一括で ON / OFF 切り替える。
-        /// </summary>
-        private void OnFilterButtonClicked()
-        {
-            // 現在の状態を反転
-            _isFilterActive = !_isFilterActive;
-
-            // 状態に応じて一括反映
-            SetFilterGroupActive(_isFilterActive);
-        }
-
-        /// <summary>
         /// OPTIONキャンバスの戻るボタン押下時処理  
         /// OptionCanvas を非表示にしてタイトルキャンバスを再表示する。
         /// </summary>
@@ -182,6 +180,23 @@ namespace CardGame.GameSystem.Manager
         }
 
         /// <summary>
+        /// FILTERボタン押下時処理  
+        /// filterGroup 内の全オブジェクトを一括で ON / OFF 切り替える。
+        /// </summary>
+        private void OnFilterButtonClicked()
+        {
+            // 現在の状態を反転
+            _isFilterActive = !_isFilterActive;
+
+            // 状態に応じて一括反映
+            SetFilterGroupActive(_isFilterActive);
+
+            // 一括変更状態を強制終了
+            _isMassChangeActive = false;
+            SetMassChangeGroupActive(_isMassChangeActive);
+        }
+
+        /// <summary>
         /// フィルター対象群の表示状態を一括設定する。
         /// </summary>
         /// <param name="isActive">表示状態（trueで表示 / falseで非表示）</param>
@@ -194,6 +209,44 @@ namespace CardGame.GameSystem.Manager
 
             // 各オブジェクトのアクティブ状態を一括設定
             foreach (GameObject obj in filterGroup)
+            {
+                if (obj != null)
+                {
+                    obj.SetActive(isActive);
+                }
+            }
+        }
+
+        /// <summary>
+        /// MASSCHANGEボタン押下時処理  
+        /// massChangeGroup 内の全オブジェクトを一括で ON / OFF 切り替える。
+        /// </summary>
+        private void OnMassChangeButtonClicked()
+        {
+            // 現在の状態を反転
+            _isMassChangeActive = !_isMassChangeActive;
+
+            // 状態に応じて一括反映
+            SetMassChangeGroupActive(_isMassChangeActive);
+
+            // フィルター状態を強制終了
+            _isFilterActive = false;
+            SetFilterGroupActive(_isFilterActive);
+        }
+
+        /// <summary>
+        /// 一括変更対象群の表示状態を一括設定する。
+        /// </summary>
+        /// <param name="isActive">表示状態（trueで表示 / falseで非表示）</param>
+        private void SetMassChangeGroupActive(bool isActive)
+        {
+            if (massChangeGroup == null || massChangeGroup.Length == 0)
+            {
+                return;
+            }
+
+            // 各オブジェクトのアクティブ状態を一括設定
+            foreach (GameObject obj in massChangeGroup)
             {
                 if (obj != null)
                 {

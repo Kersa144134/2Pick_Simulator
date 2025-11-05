@@ -259,9 +259,26 @@ namespace CardGame.UISystem.Controller
             // コストフィルタ適用
             // --------------------------------------------------
             List<CardCostButton> activeCostButtons = CostButtons.FindAll(b => b.IsActive);
+
             if (activeCostButtons.Count > 0)
             {
-                filteredCards = filteredCards.FindAll(cd => activeCostButtons.Exists(b => cd.CardCost == b.FilterValue));
+                filteredCards = filteredCards.FindAll(cd =>
+                {
+                    foreach (CardCostButton b in activeCostButtons)
+                    {
+                        // ボタンの値が10なら、カードコストが10以上を対象
+                        if (b.FilterValue == 10 && cd.CardCost >= 10)
+                        {
+                            return true;
+                        }
+                        // それ以外は通常の一致判定
+                        else if (cd.CardCost == b.FilterValue)
+                        {
+                            return true;
+                        }
+                    }
+                    return false;
+                });
             }
 
             // --------------------------------------------------

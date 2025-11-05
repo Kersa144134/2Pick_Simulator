@@ -92,12 +92,6 @@ namespace CardGame.CardSystem.Data
         [SerializeField, Range(0, 3)]
         private int maxCopies = 3;
 
-        /// <summary>
-        /// カードが抽選や表示で提示可能かどうか
-        /// </summary>
-        [SerializeField]
-        private bool isAvailable = true;
-
         // ======================================================
         // プロパティ
         // ======================================================
@@ -148,13 +142,6 @@ namespace CardGame.CardSystem.Data
         public CardRarity Rarity
         {
             get { return (CardRarity)((cardId / 10) % 10); }
-        }
-
-        /// <summary>カードの提示可能状態を取得または設定する</summary>
-        public bool IsAvailable
-        {
-            get => isAvailable;
-            set => isAvailable = value;
         }
     }
 }

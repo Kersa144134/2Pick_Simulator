@@ -15,7 +15,6 @@ using CardGame.CardSystem.Manager;
 using CardGame.CardSystem.Utility;
 using CardGame.UISystem.Controller;
 using CardGame.UISystem.Initializer;
-using static CardGame.CardSystem.Data.CardData;
 
 namespace CardGame.UISystem.Manager
 {
@@ -28,44 +27,54 @@ namespace CardGame.UISystem.Manager
         // ラッパー構造体（Inspector表示用）
         // ======================================================
 
+        [System.Serializable]
+        public struct CardFilterButtonInfo
+        {
+            public Button Button;
+            public TargetEnum TargetType;
+            public TargetValue Value;
+            public bool DefaultOn;
+            public ButtonColorSettings ColorSettings;
+        }
+
+        [System.Serializable]
+        public struct DeckableButtonInfo
+        {
+            public Button Button;
+            public TargetEnum TargetType;
+            public TargetValue Value;
+            public bool DefaultOn;
+            public ButtonColorSettings ColorSettings;
+        }
+
         /// <summary>
-        /// クラスボタン情報ラッパー
-        /// InspectorでUIボタンと初期状態を設定可能
+        /// フィルター対象の種類
+        /// </summary>
+        public enum TargetEnum
+        {
+            Class,
+            Pack,
+            Rarity,
+            Cost
+        }
+
+        /// <summary>
+        /// フィルターや提示可否用など、対象タイプごとの値を保持する汎用構造体
         /// </summary>
         [System.Serializable]
-        public struct CardClassButtonInfo
+        public struct TargetValue
         {
-            public Button Button;
-            public CardClass Class;
-            public bool DefaultOn;
-            public ButtonColorSettings ColorSettings;
-        }
+            /// <summary>カードクラス対象値</summary>
+            public CardData.CardClass ClassType;
 
-        [System.Serializable]
-        public struct CardPackButtonInfo
-        {
-            public Button Button;
+            /// <summary>パックID対象値</summary>
             public int PackId;
-            public bool DefaultOn;
-            public ButtonColorSettings ColorSettings;
-        }
 
-        [System.Serializable]
-        public struct CardRarityButtonInfo
-        {
-            public Button Button;
-            public CardRarity Rarity;
-            public bool DefaultOn;
-            public ButtonColorSettings ColorSettings;
-        }
+            /// <summary>レアリティ対象値</summary>
+            public CardData.CardRarity Rarity;
 
-        [System.Serializable]
-        public struct CardCostButtonInfo
-        {
-            public Button Button;
+            /// <summary>コスト対象値</summary>
             public int Cost;
-            public bool DefaultOn;
-            public ButtonColorSettings ColorSettings;
         }
 
         // ======================================================
@@ -106,28 +115,39 @@ namespace CardGame.UISystem.Manager
         /// <summary>コストボタン群の親</summary>
         [SerializeField] private GameObject costButtonGroup;
 
-        /// <summary>フィルターモード時に表示するパネル</summary>
-        [SerializeField] private GameObject filterPanel;
-
-        [Header("クラスボタン設定")]
+        [Header("フィルターボタン設定")]
         /// <summary>各カードクラス用ボタンと初期表示状態を設定する配列</summary>
         [SerializeField]
-        private CardClassButtonInfo[] classButtons;
+        private CardFilterButtonInfo[] classFilterButtons;
 
-        [Header("パックボタン設定")]
         /// <summary>各カードパック用ボタンと初期表示状態を設定する配列</summary>
         [SerializeField]
-        private CardPackButtonInfo[] packButtons;
+        private CardFilterButtonInfo[] packFilterButtons;
 
-        [Header("レアリティボタン設定")]
         /// <summary>各カードレアリティ用ボタンと初期表示状態を設定する配列</summary>
         [SerializeField]
-        private CardRarityButtonInfo[] rarityButtons;
+        private CardFilterButtonInfo[] rarityFilterButtons;
 
-        [Header("コストボタン設定")]
         /// <summary>各カードコスト用ボタンと初期表示状態を設定する配列</summary>
         [SerializeField]
-        private CardCostButtonInfo[] costButtons;
+        private CardFilterButtonInfo[] costFilterButtons;
+
+        [Header("一括提示枚数変更ボタン設定")]
+        /// <summary>各カードクラス用ボタンと初期表示状態を設定する配列</summary>
+        [SerializeField]
+        private DeckableButtonInfo[] classDeckableButtons;
+
+        /// <summary>各カードパック用ボタンと初期表示状態を設定する配列</summary>
+        [SerializeField]
+        private DeckableButtonInfo[] packDeckableButtons;
+
+        /// <summary>各カードレアリティ用ボタンと初期表示状態を設定する配列</summary>
+        [SerializeField]
+        private DeckableButtonInfo[] rarityDeckableButtons;
+
+        /// <summary>各カードコスト用ボタンと初期表示状態を設定する配列</summary>
+        [SerializeField]
+        private DeckableButtonInfo[] costDeckableButtons;
 
         // ======================================================
         // コンポーネント参照
@@ -215,10 +235,66 @@ namespace CardGame.UISystem.Manager
                 }
             );
 
-            // 各ボタン群の初期化を一括実行
-            initializer.InitializeAll(classButtons, packButtons, rarityButtons, costButtons);
+            // クラスボタン群を TargetValue 共通型に変換して初期化
+            CardFilterButtonInfo[] classTargets = new CardFilterButtonInfo[classFilterButtons.Length];
+            for (int i = 0; i < classFilterButtons.Length; i++)
+            {
+                classTargets[i] = new CardFilterButtonInfo
+                {
+                    Button = classFilterButtons[i].Button,
+                    TargetType = TargetEnum.Class,
+                    Value = new TargetValue { ClassType = classFilterButtons[i].Value.ClassType },
+                    DefaultOn = classFilterButtons[i].DefaultOn,
+                    ColorSettings = classFilterButtons[i].ColorSettings
+                };
+            }
 
-            // 外部からの更新通知イベントに対応
+            // パックボタン群を TargetValue 共通型に変換
+            CardFilterButtonInfo[] packTargets = new CardFilterButtonInfo[packFilterButtons.Length];
+            for (int i = 0; i < packFilterButtons.Length; i++)
+            {
+                packTargets[i] = new CardFilterButtonInfo
+                {
+                    Button = packFilterButtons[i].Button,
+                    TargetType = TargetEnum.Pack,
+                    Value = new TargetValue { PackId = packFilterButtons[i].Value.PackId },
+                    DefaultOn = packFilterButtons[i].DefaultOn,
+                    ColorSettings = packFilterButtons[i].ColorSettings
+                };
+            }
+
+            // レアリティボタン群を TargetValue 共通型に変換
+            CardFilterButtonInfo[] rarityTargets = new CardFilterButtonInfo[rarityFilterButtons.Length];
+            for (int i = 0; i < rarityFilterButtons.Length; i++)
+            {
+                rarityTargets[i] = new CardFilterButtonInfo
+                {
+                    Button = rarityFilterButtons[i].Button,
+                    TargetType = TargetEnum.Rarity,
+                    Value = new TargetValue { Rarity = rarityFilterButtons[i].Value.Rarity },
+                    DefaultOn = rarityFilterButtons[i].DefaultOn,
+                    ColorSettings = rarityFilterButtons[i].ColorSettings
+                };
+            }
+
+            // コストボタン群を TargetValue 共通型に変換
+            CardFilterButtonInfo[] costTargets = new CardFilterButtonInfo[costFilterButtons.Length];
+            for (int i = 0; i < costFilterButtons.Length; i++)
+            {
+                costTargets[i] = new CardFilterButtonInfo
+                {
+                    Button = costFilterButtons[i].Button,
+                    TargetType = TargetEnum.Cost,
+                    Value = new TargetValue { Cost = costFilterButtons[i].Value.Cost },
+                    DefaultOn = costFilterButtons[i].DefaultOn,
+                    ColorSettings = costFilterButtons[i].ColorSettings
+                };
+            }
+
+            // すべてのボタンを一括初期化
+            initializer.InitializeAll(classTargets, packTargets, rarityTargets, costTargets);
+
+            // 外部からのカード更新イベントに対応
             _buttonManager.OnCardsUpdated += () =>
             {
                 _visibleCardData = _visibilityController.GetVisibleCards();

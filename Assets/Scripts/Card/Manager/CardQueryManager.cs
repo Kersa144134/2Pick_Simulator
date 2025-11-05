@@ -27,8 +27,8 @@ namespace CardGame.CardSystem.Manager
 
             foreach (CardData card in db.AllCards)
             {
-                // 最大枚数が0以下または提示不可カードはスキップ
-                if (db.GetDeckableCopies(card.CardId) <= 0 || !card.IsAvailable) continue;
+                // 最大枚数が0以下のカードはスキップ
+                if (db.GetDeckableCopies(card.CardId) <= 0) continue;
 
                 foreach (CardData.CardClass cls in targetClasses)
                 {
@@ -53,8 +53,8 @@ namespace CardGame.CardSystem.Manager
 
             foreach (CardData card in db.AllCards)
             {
-                // 最大枚数が0以下または提示不可カードはスキップ
-                if (db.GetDeckableCopies(card.CardId) <= 0 || !card.IsAvailable) continue;
+                // 最大枚数が0以下のカードはスキップ
+                if (db.GetDeckableCopies(card.CardId) <= 0) continue;
 
                 foreach (CardData.CardRarity rarity in targetRarities)
                 {

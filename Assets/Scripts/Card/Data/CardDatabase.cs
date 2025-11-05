@@ -145,29 +145,15 @@ namespace CardGame.CardSystem.Data
         // --------------------------------------------------
 
         /// <summary>
-        /// 特定クラスのカード全ての提示可能フラグを一括変更する
-        /// </summary>
-        public void SetAvailableByClass(CardData.CardClass targetClass, bool isAvailable)
-        {
-            foreach (CardData data in cardList)
-            {
-                if (data.ClassType == targetClass)
-                {
-                    data.IsAvailable = isAvailable;
-                }
-            }
-        }
-
-        /// <summary>
         /// 特定パックのカード全ての提示可能フラグを一括変更する
         /// </summary>
-        public void SetAvailableByPack(int packNumber, bool isAvailable)
+        public void SetAvailableByPack(int packNumber, int newValue)
         {
             foreach (CardData data in cardList)
             {
                 if (data.PackNumber == packNumber)
                 {
-                    data.IsAvailable = isAvailable;
+                    SetDeckableCopies(data.CardId, newValue);
                 }
             }
         }
@@ -175,40 +161,28 @@ namespace CardGame.CardSystem.Data
         /// <summary>
         /// 特定レアリティのカード全ての提示可能フラグを一括変更する
         /// </summary>
-        public void SetAvailableByRarity(CardData.CardRarity rarity, bool isAvailable)
+        public void SetAvailableByRarity(CardData.CardRarity rarity, int newValue)
         {
             foreach (CardData data in cardList)
             {
                 if (data.Rarity == rarity)
                 {
-                    data.IsAvailable = isAvailable;
+                    SetDeckableCopies(data.CardId, newValue);
                 }
             }
         }
 
-        // --------------------------------------------------
-        // 一括初期化（提示可フラグ）
-        // --------------------------------------------------
-
         /// <summary>
-        /// 全カードを提示可能状態にリセットする
+        /// 特定コストのカード全ての提示可能フラグを一括変更する
         /// </summary>
-        public void ResetAllAvailable()
+        public void SetAvailableByCost(int cost, int newValue)
         {
             foreach (CardData data in cardList)
             {
-                data.IsAvailable = true;
-            }
-        }
-
-        /// <summary>
-        /// 全カードを提示不可状態に設定する
-        /// </summary>
-        public void SetAllUnavailable()
-        {
-            foreach (CardData data in cardList)
-            {
-                data.IsAvailable = false;
+                if (data.CardCost == cost)
+                {
+                    SetDeckableCopies(data.CardId, newValue);
+                }
             }
         }
     }

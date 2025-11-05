@@ -62,7 +62,7 @@ namespace CardGame.UISystem.Initializer
         /// <summary>
         /// クラスボタンを初期化
         /// </summary>
-        public void InitializeClassButtons(OptionDisplayManager.CardClassButtonInfo[] classButtons)
+        public void InitializeClassButtons(OptionDisplayManager.CardFilterButtonInfo[] classButtons)
         {
             if (classButtons == null || classButtons.Length == 0)
             {
@@ -70,15 +70,18 @@ namespace CardGame.UISystem.Initializer
                 return;
             }
 
-            foreach (var cb in classButtons)
+            foreach (OptionDisplayManager.CardFilterButtonInfo cb in classButtons)
             {
                 if (cb.Button == null) continue;
 
-                // ボタン生成と登録
-                var btn = new CardClassButton(cb.Button, cb.ColorSettings, cb.Class, cb.DefaultOn);
+                CardClassButton btn = new CardClassButton(
+                    cb.Button,
+                    cb.ColorSettings,
+                    cb.Value.ClassType,
+                    cb.DefaultOn
+                );
                 _buttonManager.RegisterClassButton(btn);
 
-                // 押下時イベント登録
                 cb.Button.onClick.AddListener(() => _onButtonUpdate?.Invoke());
             }
         }
@@ -86,15 +89,20 @@ namespace CardGame.UISystem.Initializer
         /// <summary>
         /// パックボタンを初期化
         /// </summary>
-        public void InitializePackButtons(OptionDisplayManager.CardPackButtonInfo[] packButtons)
+        public void InitializePackButtons(OptionDisplayManager.CardFilterButtonInfo[] packButtons)
         {
-            if (packButtons == null) return;
+            if (packButtons == null || packButtons.Length == 0) return;
 
-            foreach (var pb in packButtons)
+            foreach (OptionDisplayManager.CardFilterButtonInfo pb in packButtons)
             {
                 if (pb.Button == null) continue;
 
-                var btn = new CardPackButton(pb.Button, pb.ColorSettings, pb.PackId, pb.DefaultOn);
+                CardPackButton btn = new CardPackButton(
+                    pb.Button,
+                    pb.ColorSettings,
+                    pb.Value.PackId,
+                    pb.DefaultOn
+                );
                 _buttonManager.RegisterPackButton(btn);
 
                 pb.Button.onClick.AddListener(() => _onButtonUpdate?.Invoke());
@@ -104,15 +112,20 @@ namespace CardGame.UISystem.Initializer
         /// <summary>
         /// レアリティボタンを初期化
         /// </summary>
-        public void InitializeRarityButtons(OptionDisplayManager.CardRarityButtonInfo[] rarityButtons)
+        public void InitializeRarityButtons(OptionDisplayManager.CardFilterButtonInfo[] rarityButtons)
         {
-            if (rarityButtons == null) return;
+            if (rarityButtons == null || rarityButtons.Length == 0) return;
 
-            foreach (var rb in rarityButtons)
+            foreach (OptionDisplayManager.CardFilterButtonInfo rb in rarityButtons)
             {
                 if (rb.Button == null) continue;
 
-                var btn = new CardRarityButton(rb.Button, rb.ColorSettings, rb.Rarity, rb.DefaultOn);
+                CardRarityButton btn = new CardRarityButton(
+                    rb.Button,
+                    rb.ColorSettings,
+                    rb.Value.Rarity,
+                    rb.DefaultOn
+                );
                 _buttonManager.RegisterRarityButton(btn);
 
                 rb.Button.onClick.AddListener(() => _onButtonUpdate?.Invoke());
@@ -122,15 +135,20 @@ namespace CardGame.UISystem.Initializer
         /// <summary>
         /// コストボタンを初期化
         /// </summary>
-        public void InitializeCostButtons(OptionDisplayManager.CardCostButtonInfo[] costButtons)
+        public void InitializeCostButtons(OptionDisplayManager.CardFilterButtonInfo[] costButtons)
         {
-            if (costButtons == null) return;
+            if (costButtons == null || costButtons.Length == 0) return;
 
-            foreach (var cb in costButtons)
+            foreach (OptionDisplayManager.CardFilterButtonInfo cb in costButtons)
             {
                 if (cb.Button == null) continue;
 
-                var btn = new CardCostButton(cb.Button, cb.ColorSettings, cb.Cost, cb.DefaultOn);
+                CardCostButton btn = new CardCostButton(
+                    cb.Button,
+                    cb.ColorSettings,
+                    cb.Value.Cost,
+                    cb.DefaultOn
+                );
                 _buttonManager.RegisterCostButton(btn);
 
                 cb.Button.onClick.AddListener(() => _onButtonUpdate?.Invoke());
@@ -141,10 +159,10 @@ namespace CardGame.UISystem.Initializer
         /// すべてのボタンを一括初期化
         /// </summary>
         public void InitializeAll(
-            OptionDisplayManager.CardClassButtonInfo[] classButtons,
-            OptionDisplayManager.CardPackButtonInfo[] packButtons,
-            OptionDisplayManager.CardRarityButtonInfo[] rarityButtons,
-            OptionDisplayManager.CardCostButtonInfo[] costButtons
+            OptionDisplayManager.CardFilterButtonInfo[] classButtons,
+            OptionDisplayManager.CardFilterButtonInfo[] packButtons,
+            OptionDisplayManager.CardFilterButtonInfo[] rarityButtons,
+            OptionDisplayManager.CardFilterButtonInfo[] costButtons
         )
         {
             InitializeClassButtons(classButtons);
