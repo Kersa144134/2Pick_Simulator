@@ -260,75 +260,34 @@ namespace CardGame.UISystem.Initializer
         }
 
         /// <summary>
-        /// Deckableボタンに対応するCountTextを最新状態に更新する（デバッグログ付き）
+        /// Deckableボタンに対応するCountTextを最新状態に更新する（簡易ログ版）
         /// </summary>
         /// <param name="db">更新対象の DeckableButtonInfo（単体）</param>
         private void UpdateDeckableCountText(DeckableButtonInfo db)
         {
-            // 引数チェック：nullや表示対象Textが無ければ処理不要
+            // 無効チェック：対象またはText未設定なら処理中断
             if (db == null || db.CountText == null)
             {
-                UnityEngine.Debug.LogWarning("[DeckableCount] db または CountText が null のため更新スキップ");
                 return;
             }
 
-            UnityEngine.Debug.Log($"[DeckableCount] 更新開始: Target={db.TargetType}");
-
-            // CardButtonManager 側に用意した全件取得メソッドを呼び出す。
-            // 存在しないケースに備え、null合体で空辞書を安全に用意する。
-            IReadOnlyDictionary<int, int> packCounts = null;
-            IReadOnlyDictionary<CardRarity, int> rarityCounts = null;
-            IReadOnlyDictionary<int, int> costCounts = null;
-
-            try
-            {
-                packCounts = _buttonManager.GetAllPackAvailableCounts();
-                UnityEngine.Debug.Log($"[DeckableCount] Pack辞書取得成功（要素数={packCounts?.Count ?? 0}）");
-            }
-            catch (Exception e)
-            {
-                UnityEngine.Debug.LogWarning($"[DeckableCount] Pack辞書取得失敗: {e.Message}");
-                packCounts = new Dictionary<int, int>();
-            }
-
-            try
-            {
-                rarityCounts = _buttonManager.GetAllRarityAvailableCounts();
-                UnityEngine.Debug.Log($"[DeckableCount] Rarity辞書取得成功（要素数={rarityCounts?.Count ?? 0}）");
-            }
-            catch (Exception e)
-            {
-                UnityEngine.Debug.LogWarning($"[DeckableCount] Rarity辞書取得失敗: {e.Message}");
-                rarityCounts = new Dictionary<CardRarity, int>();
-            }
-
-            try
-            {
-                costCounts = _buttonManager.GetAllCostAvailableCounts();
-                UnityEngine.Debug.Log($"[DeckableCount] Cost辞書取得成功（要素数={costCounts?.Count ?? 0}）");
-            }
-            catch (Exception e)
-            {
-                UnityEngine.Debug.LogWarning($"[DeckableCount] Cost辞書取得失敗: {e.Message}");
-                costCounts = new Dictionary<int, int>();
-            }
-
-            // --------------------------------------------------
-            // 対象タイプに応じてカウントを取得
-            // --------------------------------------------------
+            // 現在値初期化
             int current = 0;
 
+            // 全辞書を取得（例外想定なし）
+            IReadOnlyDictionary<int, int> packCounts = _buttonManager.GetAllPackAvailableCounts();
+            IReadOnlyDictionary<CardRarity, int> rarityCounts = _buttonManager.GetAllRarityAvailableCounts();
+            IReadOnlyDictionary<int, int> costCounts = _buttonManager.GetAllCostAvailableCounts();
+
+            // --------------------------------------------------
+            // 対象タイプ別にカウント値を決定
+            // --------------------------------------------------
             switch (db.TargetType)
             {
                 case TargetEnum.Pack:
                     if (db.Value != null && packCounts.ContainsKey(db.Value.PackId))
                     {
                         current = packCounts[db.Value.PackId];
-                        UnityEngine.Debug.Log($"[DeckableCount] PackId={db.Value.PackId} → Count={current}");
-                    }
-                    else
-                    {
-                        UnityEngine.Debug.LogWarning($"[DeckableCount] PackId={db?.Value?.PackId} 未登録または辞書なし");
                     }
                     break;
 
@@ -336,11 +295,6 @@ namespace CardGame.UISystem.Initializer
                     if (db.Value != null && rarityCounts.ContainsKey(db.Value.Rarity))
                     {
                         current = rarityCounts[db.Value.Rarity];
-                        UnityEngine.Debug.Log($"[DeckableCount] Rarity={db.Value.Rarity} → Count={current}");
-                    }
-                    else
-                    {
-                        UnityEngine.Debug.LogWarning($"[DeckableCount] Rarity={db?.Value?.Rarity} 未登録または辞書なし");
                     }
                     break;
 
@@ -348,27 +302,15 @@ namespace CardGame.UISystem.Initializer
                     if (db.Value != null && costCounts.ContainsKey(db.Value.Cost))
                     {
                         current = costCounts[db.Value.Cost];
-                        UnityEngine.Debug.Log($"[DeckableCount] Cost={db.Value.Cost} → Count={current}");
                     }
-                    else
-                    {
-                        UnityEngine.Debug.LogWarning($"[DeckableCount] Cost={db?.Value?.Cost} 未登録または辞書なし");
-                    }
-                    break;
-
-                default:
-                    UnityEngine.Debug.LogWarning($"[DeckableCount] 未定義TargetType: {db.TargetType}");
-                    current = 0;
                     break;
             }
 
             // --------------------------------------------------
-            // テキスト反映（存在しない場合は "0" 表示）
+            // テキスト反映
             // --------------------------------------------------
             db.CountText.text = current.ToString();
-            UnityEngine.Debug.Log($"[DeckableCount] テキスト更新完了 → {current}");
         }
-
 
         // ======================================================
         // 一括初期化
@@ -391,6 +333,8 @@ namespace CardGame.UISystem.Initializer
             InitializeFilterPackButtons(packButtons);
             InitializeFilterRarityButtons(rarityButtons);
             InitializeFilterCostButtons(costButtons);
+
+            _buttonManager.InitializeAvailableCountDictionaries();
 
             InitializeDeckableButtons(packDeckables);
             InitializeDeckableButtons(rarityDeckables);

@@ -2,9 +2,9 @@
 // CardRandomPicker.cs
 // 作成者     : 高橋一翔
 // 作成日時   : 2025-11-03
-// 更新日時   : 2025-11-03
+// 更新日時   : 2025-11-05
 // 概要       : カードのランダム抽選を管理
-//             複数クラス・複数レアリティ・ピック率対応（累積型レアリティ先行抽選）
+//              レアリティ不足時は未指定レアリティを低い順に追加して再抽選
 // ======================================================
 
 using System.Collections.Generic;
@@ -23,31 +23,19 @@ namespace CardGame.PickSystem.Controller
         // 定数
         // ======================================================
 
-        /// <summary>最新パックカードのピック率補正値</summary>
         private const float LATEST_PACK_WEIGHT = 1.2f;
-
-        /// <summary>ニュートラルカードのピック率補正値</summary>
         private const float NEUTRAL_CARD_WEIGHT = 0.1f;
-
-        /// <summary>ブロンズカードの抽選ウェイト</summary>
         private const float BRONZE_WEIGHT = 1.0f;
-
-        /// <summary>シルバーカードの抽選ウェイト</summary>
         private const float SILVER_WEIGHT = 1.0f;
-
-        /// <summary>ゴールドカードの抽選ウェイト</summary>
         private const float GOLD_WEIGHT = 1.5f;
-
-        /// <summary>レジェンドカードの抽選ウェイト</summary>
         private const float LEGEND_WEIGHT = 2.0f;
-        
+
         // ======================================================
         // パブリックメソッド
         // ======================================================
 
         /// <summary>
-        /// 指定複数クラスかつ複数レアリティのカードからランダムに複数枚取得（重複なし）
-        /// レアリティ先行抽選＋カードウェイト考慮
+        /// 指定クラス・レアリティのカードを複数枚抽選（不足時はレアリティを拡張して再抽選）
         /// </summary>
         public static List<CardData> GetRandomCardsByClassAndRarity(
             CardDatabase db,
@@ -69,20 +57,28 @@ namespace CardGame.PickSystem.Controller
             List<CardData> classFiltered = CardQueryManager.GetCardsByClass(db, classes);
 
             // ------------------------------
-            // 抽選枚数分、レアリティ→カード抽選
+            // 抽選処理
             // ------------------------------
             int remaining = count;
-
-            // レアリティ候補をコピーして管理（抽選失敗レアリティを除外するため）
             List<CardData.CardRarity> remainingRarities = new List<CardData.CardRarity>(rarities);
 
             while (remaining > 0)
             {
                 // --------------------------------------------------
-                // 候補レアリティがなくなった場合は抽選失敗として空リスト返却
+                // 候補が尽きた場合は、再抽選を試行
                 // --------------------------------------------------
                 if (remainingRarities.Count == 0)
                 {
+                    // 未指定レアリティを低い順で取得
+                    CardData.CardRarity[] nextRarities = GetNextAvailableRarities(rarities);
+
+                    if (nextRarities != null)
+                    {
+                        // 再帰呼び出しで再抽選
+                        return GetRandomCardsByClassAndRarity(db, count, classes, nextRarities);
+                    }
+
+                    // Legendまで試しても失敗したら空
                     return new List<CardData>();
                 }
 
@@ -92,7 +88,7 @@ namespace CardGame.PickSystem.Controller
                 CardData.CardRarity selectedRarity = PickRarityWeighted(remainingRarities.ToArray());
 
                 // --------------------------------------------------
-                // 選ばれたレアリティのカードをフィルタ
+                // 選ばれたレアリティのカードを抽出
                 // --------------------------------------------------
                 List<CardData> rarityFiltered = CardQueryManager.GetCardsByRarity(db, selectedRarity);
                 List<CardData> candidateCards = new List<CardData>();
@@ -105,9 +101,7 @@ namespace CardGame.PickSystem.Controller
                     }
                 }
 
-                // --------------------------------------------------
-                // 該当カードなしの場合は、このレアリティを候補から除外して再抽選
-                // --------------------------------------------------
+                // 該当カードが存在しない場合は候補から除外
                 if (candidateCards.Count == 0)
                 {
                     remainingRarities.Remove(selectedRarity);
@@ -115,7 +109,7 @@ namespace CardGame.PickSystem.Controller
                 }
 
                 // --------------------------------------------------
-                // カードウェイト付き抽選
+                // ウェイト抽選で1枚選択
                 // --------------------------------------------------
                 CardData picked = PickCardWeighted(candidateCards, db);
 
@@ -123,6 +117,18 @@ namespace CardGame.PickSystem.Controller
                 {
                     result.Add(picked);
                     remaining--;
+                }
+            }
+
+            // --------------------------------------------------
+            // 枚数不足の場合も低い順に上位レアリティで再抽選
+            // --------------------------------------------------
+            if (result.Count < count)
+            {
+                CardData.CardRarity[] nextRarities = GetNextAvailableRarities(rarities);
+                if (nextRarities != null)
+                {
+                    return GetRandomCardsByClassAndRarity(db, count, classes, nextRarities);
                 }
             }
 
@@ -134,20 +140,70 @@ namespace CardGame.PickSystem.Controller
         // ======================================================
 
         /// <summary>
+        /// 現在指定されていないレアリティを低い順で1段階ずつ追加して返す
+        /// </summary>
+        private static CardData.CardRarity[] GetNextAvailableRarities(CardData.CardRarity[] current)
+        {
+            // 全レアリティを昇順で定義
+            CardData.CardRarity[] all = new CardData.CardRarity[]
+            {
+                CardData.CardRarity.Bronze,
+                CardData.CardRarity.Silver,
+                CardData.CardRarity.Gold,
+                CardData.CardRarity.Legend
+            };
+
+            // 既にLegendまで含んでいる場合は終了
+            if (current.Length >= 4)
+            {
+                return null;
+            }
+
+            // 現在指定されていないレアリティを抽出
+            List<CardData.CardRarity> available = new List<CardData.CardRarity>();
+
+            foreach (CardData.CardRarity rarity in all)
+            {
+                bool exists = false;
+                foreach (CardData.CardRarity c in current)
+                {
+                    if (c == rarity)
+                    {
+                        exists = true;
+                        break;
+                    }
+                }
+
+                if (!exists)
+                {
+                    available.Add(rarity);
+                }
+            }
+
+            // 新たに1段階上位のレアリティを追加
+            if (available.Count > 0)
+            {
+                // 最も低い未指定レアリティを1つ追加
+                CardData.CardRarity next = available[0];
+                List<CardData.CardRarity> expanded = new List<CardData.CardRarity>(current);
+                expanded.Add(next);
+                return expanded.ToArray();
+            }
+
+            return null;
+        }
+
+        /// <summary>
         /// レアリティ配列からウェイト付きで1つ選択
         /// </summary>
         private static CardData.CardRarity PickRarityWeighted(CardData.CardRarity[] rarities)
         {
-            // ------------------------------
-            // 各レアリティのウェイト計算
-            // ------------------------------
             Dictionary<CardData.CardRarity, float> weights = new Dictionary<CardData.CardRarity, float>();
             float totalWeight = 0f;
 
             foreach (CardData.CardRarity rarity in rarities)
             {
                 float weight = 1f;
-
                 switch (rarity)
                 {
                     case CardData.CardRarity.Bronze: weight = BRONZE_WEIGHT; break;
@@ -155,14 +211,10 @@ namespace CardGame.PickSystem.Controller
                     case CardData.CardRarity.Gold: weight = GOLD_WEIGHT; break;
                     case CardData.CardRarity.Legend: weight = LEGEND_WEIGHT; break;
                 }
-
                 weights[rarity] = weight;
                 totalWeight += weight;
             }
 
-            // ------------------------------
-            // 累積確率型でランダム抽選
-            // ------------------------------
             float random = Random.Range(0f, totalWeight);
             float cumulative = 0f;
 
@@ -171,12 +223,10 @@ namespace CardGame.PickSystem.Controller
                 cumulative += keyValue.Value;
                 if (random <= cumulative)
                 {
-                    // 抽選されたレアリティを返す
                     return keyValue.Key;
                 }
             }
 
-            // ループを抜けた場合は最初のレアリティを返す
             return rarities[0];
         }
 
@@ -185,64 +235,40 @@ namespace CardGame.PickSystem.Controller
         /// </summary>
         private static CardData PickCardWeighted(List<CardData> cards, CardDatabase db)
         {
-            // ------------------------------
-            // 累積確率型ウェイト抽選
-            // ------------------------------
-
-            // ウェイトの総和を計算するための変数
             float total = 0f;
-
-            // 各カードのウェイトを格納する辞書
             Dictionary<CardData, float> weights = new Dictionary<CardData, float>();
 
-            // ------------------------------
-            // 各カードのウェイト計算
-            // ------------------------------
             foreach (CardData card in cards)
             {
-                // 基本ウェイトの設定
                 float weight = 1.0f;
 
-                // 最新パックのカードのピック率代入
                 if (card.PackNumber == db.LatestPackNumber)
                 {
                     weight *= LATEST_PACK_WEIGHT;
                 }
 
-                // ニュートラルカードのピック率代入
                 if (card.ClassType == CardData.CardClass.Neutral)
                 {
                     weight *= NEUTRAL_CARD_WEIGHT;
                 }
 
-                // カードごとのウェイトを保存
                 weights[card] = weight;
-
-                // 総ウェイトに加算
                 total += weight;
             }
 
-            // 0～総ウェイトの範囲でランダム値を生成
             float random = Random.Range(0f, total);
-
-            // ------------------------------
-            // 累積ウェイトを使ってカードを決定
-            // ------------------------------
             float cumulative = 0f;
 
-            foreach (KeyValuePair<CardData, float> keyValue in weights)
+            foreach (KeyValuePair<CardData, float> kv in weights)
             {
-                // 現在のカードのウェイトを累積
-                cumulative += keyValue.Value; 
+                cumulative += kv.Value;
                 if (random <= cumulative)
                 {
-                    // ランダム値が累積ウェイト以下になった時点でそのカードを選択
-                    return keyValue.Key;
+                    return kv.Key;
                 }
             }
 
-            // 選択できなかった場合は先頭カードを返す
-            return cards[0];
+            return cards.Count > 0 ? cards[0] : null;
         }
     }
 }

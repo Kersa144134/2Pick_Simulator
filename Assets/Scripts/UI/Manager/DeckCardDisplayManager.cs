@@ -196,6 +196,11 @@ namespace CardGame.UISystem.Manager
                 return;
             }
 
+            if (_cardDisplays == null || _cardDisplays.Count <= 0)
+            {
+                return;
+            }
+
             // ピック済みカードの一覧を取得する
             List<DeckListManager.PickedCardEntry> pickedEntries = DeckListManager.Instance.GetPickedCardEntries();
 

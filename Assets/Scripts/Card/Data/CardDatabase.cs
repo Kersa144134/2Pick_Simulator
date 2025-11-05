@@ -61,6 +61,19 @@ namespace CardGame.CardSystem.Data
             }
         }
 
+        public List<int> GetAllPackIds()
+        {
+            List<int> packIds = new List<int>();
+            foreach (CardData card in AllCards)
+            {
+                if (!packIds.Contains(card.PackNumber))
+                {
+                    packIds.Add(card.PackNumber);
+                }
+            }
+            return packIds;
+        }
+
         // ======================================================
         // 辞書
         // ======================================================

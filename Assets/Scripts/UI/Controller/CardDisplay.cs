@@ -39,6 +39,13 @@ namespace CardGame.UISystem.Controller
         private CardQuantityController _quantityController = new CardQuantityController();
 
         // ======================================================
+        // プロパティ
+        // ======================================================
+
+        /// <summary>枚数管理・UI同期制御クラス</summary>
+        public CardQuantityController QuantityController => _quantityController;
+
+        // ======================================================
         // 初期化
         // ======================================================
 

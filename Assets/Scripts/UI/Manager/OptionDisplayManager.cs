@@ -194,9 +194,6 @@ namespace CardGame.UISystem.Manager
         /// <summary>現在表示対象となるCardDataリスト</summary>
         private List<CardData> _visibleCardData = new List<CardData>();
 
-        /// <summary>すべてのフィルターグループをまとめた一括制御用配列</summary>
-        private GameObject[] _filterGroups;
-
         // ======================================================
         // Unityイベント
         // ======================================================
@@ -339,6 +336,8 @@ namespace CardGame.UISystem.Manager
                 display.Initialize(data, _cardDatabase);
                 _cardDisplays.Add(display);
             }
+
+            _buttonManager.SetCardDisplays(_cardDisplays);
         }
 
         // ======================================================

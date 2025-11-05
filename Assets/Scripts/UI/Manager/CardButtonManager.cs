@@ -1,11 +1,11 @@
-// ======================================================
+ï»¿// ======================================================
 // CardButtonManager.cs
-// ì¬Ò     : ‚‹´ˆêãÄ
-// ì¬“ú   : 2025-10-31
-// XV“ú   : 2025-11-05
-// ŠT—v       : ƒJ[ƒhƒtƒBƒ‹ƒ^ƒ{ƒ^ƒ“iƒNƒ‰ƒXEƒpƒbƒNEƒŒƒAƒŠƒeƒBEƒRƒXƒgj‚ğŠÇ—
-//              ƒ{ƒ^ƒ“‰Ÿ‰º‚É‚æ‚éó‘Ô•ÏX‚ğ“‡‚µAƒJ[ƒh•\¦/”ñ•\¦XV‚¨‚æ‚Ñ
-//              ’ñ¦‰Â”\–‡”§Œä‚ğs‚¤
+// ä½œæˆè€…     : é«˜æ©‹ä¸€ç¿”
+// ä½œæˆæ—¥æ™‚   : 2025-10-31
+// æ›´æ–°æ—¥æ™‚   : 2025-11-05
+// æ¦‚è¦       : ã‚«ãƒ¼ãƒ‰ãƒ•ã‚£ãƒ«ã‚¿ãƒœã‚¿ãƒ³ï¼ˆã‚¯ãƒ©ã‚¹ãƒ»ãƒ‘ãƒƒã‚¯ãƒ»ãƒ¬ã‚¢ãƒªãƒ†ã‚£ãƒ»ã‚³ã‚¹ãƒˆï¼‰ã‚’ç®¡ç†
+//              ãƒœã‚¿ãƒ³æŠ¼ä¸‹ã«ã‚ˆã‚‹çŠ¶æ…‹å¤‰æ›´ã‚’çµ±åˆã—ã€ã‚«ãƒ¼ãƒ‰è¡¨ç¤º/éè¡¨ç¤ºæ›´æ–°ãŠã‚ˆã³
+//              æç¤ºå¯èƒ½æšæ•°åˆ¶å¾¡ã‚’è¡Œã†
 // ======================================================
 
 using System;
@@ -20,60 +20,60 @@ using static CardGame.CardSystem.Data.CardData;
 namespace CardGame.UISystem.Controller
 {
     /// <summary>
-    /// ƒ{ƒ^ƒ“‰Ÿ‰º‚ÌƒIƒ“^ƒIƒtF‚ğ•Û‚·‚é\‘¢‘Ì
+    /// ãƒœã‚¿ãƒ³æŠ¼ä¸‹æ™‚ã®ã‚ªãƒ³ï¼ã‚ªãƒ•è‰²ã‚’ä¿æŒã™ã‚‹æ§‹é€ ä½“
     /// </summary>
     [Serializable]
     public struct ButtonColorSettings
     {
-        /// <summary>ƒ{ƒ^ƒ“‰Ÿ‰º‚ÌF</summary>
+        /// <summary>ãƒœã‚¿ãƒ³æŠ¼ä¸‹æ™‚ã®è‰²</summary>
         public Color OnColor;
 
-        /// <summary>ƒ{ƒ^ƒ“”ñ‰Ÿ‰º‚ÌF</summary>
+        /// <summary>ãƒœã‚¿ãƒ³éæŠ¼ä¸‹æ™‚ã®è‰²</summary>
         public Color OffColor;
     }
 
     /// <summary>
-    /// ƒWƒFƒlƒŠƒbƒN‚ÈƒJ[ƒhƒtƒBƒ‹ƒ^ƒ{ƒ^ƒ“‚ÌŠî’êƒNƒ‰ƒX
+    /// ã‚¸ã‚§ãƒãƒªãƒƒã‚¯ãªã‚«ãƒ¼ãƒ‰ãƒ•ã‚£ãƒ«ã‚¿ãƒœã‚¿ãƒ³ã®åŸºåº•ã‚¯ãƒ©ã‚¹
     /// </summary>
-    /// <typeparam name="T">ƒtƒBƒ‹ƒ^‘ÎÛ‚Ì’liƒNƒ‰ƒXAƒpƒbƒNAƒŒƒAƒŠƒeƒBAƒRƒXƒgj</typeparam>
+    /// <typeparam name="T">ãƒ•ã‚£ãƒ«ã‚¿å¯¾è±¡ã®å€¤ï¼ˆã‚¯ãƒ©ã‚¹ã€ãƒ‘ãƒƒã‚¯ã€ãƒ¬ã‚¢ãƒªãƒ†ã‚£ã€ã‚³ã‚¹ãƒˆï¼‰</typeparam>
     public class CardFilterButton<T>
     {
         // ======================================================
-        // ƒtƒB[ƒ‹ƒh
+        // ãƒ•ã‚£ãƒ¼ãƒ«ãƒ‰
         // ======================================================
 
-        /// <summary>‘ÎÛ‚Æ‚È‚éUIƒ{ƒ^ƒ“ƒRƒ“ƒ|[ƒlƒ“ƒg</summary>
+        /// <summary>å¯¾è±¡ã¨ãªã‚‹UIãƒœã‚¿ãƒ³ã‚³ãƒ³ãƒãƒ¼ãƒãƒ³ãƒˆ</summary>
         protected Button _button;
 
-        /// <summary>ƒ{ƒ^ƒ“‰Ÿ‰º‚ÌƒIƒ“^ƒIƒtF‚ğ•Û‚·‚é\‘¢‘Ì</summary>
+        /// <summary>ãƒœã‚¿ãƒ³æŠ¼ä¸‹æ™‚ã®ã‚ªãƒ³ï¼ã‚ªãƒ•è‰²ã‚’ä¿æŒã™ã‚‹æ§‹é€ ä½“</summary>
         protected ButtonColorSettings _colorSettings;
 
-        /// <summary>Œ»İ‚Ìƒ{ƒ^ƒ“‰Ÿ‰ºó‘ÔiƒIƒ“trueAƒIƒtfalsej</summary>
+        /// <summary>ç¾åœ¨ã®ãƒœã‚¿ãƒ³æŠ¼ä¸‹çŠ¶æ…‹ï¼ˆã‚ªãƒ³ï¼trueã€ã‚ªãƒ•ï¼falseï¼‰</summary>
         protected bool _isActive;
 
         // ======================================================
-        // ƒvƒƒpƒeƒB
+        // ãƒ—ãƒ­ãƒ‘ãƒ†ã‚£
         // ======================================================
 
-        /// <summary>ƒ{ƒ^ƒ“‚ÌŒ»İ‰Ÿ‰ºó‘Ô</summary>
+        /// <summary>ãƒœã‚¿ãƒ³ã®ç¾åœ¨æŠ¼ä¸‹çŠ¶æ…‹</summary>
         public bool IsActive => _isActive;
 
-        /// <summary>‚±‚Ìƒ{ƒ^ƒ“‚ª•Û‚·‚éƒtƒBƒ‹ƒ^’l</summary>
+        /// <summary>ã“ã®ãƒœã‚¿ãƒ³ãŒä¿æŒã™ã‚‹ãƒ•ã‚£ãƒ«ã‚¿å€¤</summary>
         public T FilterValue { get; protected set; }
 
         // ======================================================
-        // ƒCƒxƒ“ƒg
+        // ã‚¤ãƒ™ãƒ³ãƒˆ
         // ======================================================
 
-        /// <summary>ƒ{ƒ^ƒ“‰Ÿ‰º‚Éó‘Ô‚ª•Ï‰»‚µ‚½Û‚É’Ê’m‚³‚ê‚éƒCƒxƒ“ƒg</summary>
+        /// <summary>ãƒœã‚¿ãƒ³æŠ¼ä¸‹æ™‚ã«çŠ¶æ…‹ãŒå¤‰åŒ–ã—ãŸéš›ã«é€šçŸ¥ã•ã‚Œã‚‹ã‚¤ãƒ™ãƒ³ãƒˆ</summary>
         public event Action<CardFilterButton<T>> OnFilterToggled;
 
         // ======================================================
-        // ƒRƒ“ƒXƒgƒ‰ƒNƒ^
+        // ã‚³ãƒ³ã‚¹ãƒˆãƒ©ã‚¯ã‚¿
         // ======================================================
 
         /// <summary>
-        /// ƒRƒ“ƒXƒgƒ‰ƒNƒ^Fƒ{ƒ^ƒ“‰Šú‰»AƒNƒŠƒbƒNƒCƒxƒ“ƒg“o˜^
+        /// ã‚³ãƒ³ã‚¹ãƒˆãƒ©ã‚¯ã‚¿ï¼šãƒœã‚¿ãƒ³åˆæœŸåŒ–ã€ã‚¯ãƒªãƒƒã‚¯ã‚¤ãƒ™ãƒ³ãƒˆç™»éŒ²
         /// </summary>
         public CardFilterButton(Button button, ButtonColorSettings colorSettings, T value, bool defaultOn)
         {
@@ -99,11 +99,11 @@ namespace CardGame.UISystem.Controller
         }
 
         // ======================================================
-        // ƒpƒuƒŠƒbƒNƒƒ\ƒbƒh
+        // ãƒ‘ãƒ–ãƒªãƒƒã‚¯ãƒ¡ã‚½ãƒƒãƒ‰
         // ======================================================
 
         /// <summary>
-        /// ƒ{ƒ^ƒ“‰Ÿ‰º‚ÉƒIƒ“^ƒIƒtF‚ğØ‚è‘Ö‚¦‚é
+        /// ãƒœã‚¿ãƒ³æŠ¼ä¸‹æ™‚ã«ã‚ªãƒ³ï¼ã‚ªãƒ•è‰²ã‚’åˆ‡ã‚Šæ›¿ãˆã‚‹
         /// </summary>
         public void ToggleColor()
         {
@@ -117,28 +117,28 @@ namespace CardGame.UISystem.Controller
         }
     }
 
-    /// <summary>ƒJ[ƒhƒNƒ‰ƒX—pƒtƒBƒ‹ƒ^ƒ{ƒ^ƒ“</summary>
+    /// <summary>ã‚«ãƒ¼ãƒ‰ã‚¯ãƒ©ã‚¹ç”¨ãƒ•ã‚£ãƒ«ã‚¿ãƒœã‚¿ãƒ³</summary>
     public class CardClassButton : CardFilterButton<CardClass>
     {
         public CardClassButton(Button button, ButtonColorSettings colorSettings, CardClass value, bool defaultOn)
             : base(button, colorSettings, value, defaultOn) { }
     }
 
-    /// <summary>ƒJ[ƒhƒpƒbƒN—pƒtƒBƒ‹ƒ^ƒ{ƒ^ƒ“</summary>
+    /// <summary>ã‚«ãƒ¼ãƒ‰ãƒ‘ãƒƒã‚¯ç”¨ãƒ•ã‚£ãƒ«ã‚¿ãƒœã‚¿ãƒ³</summary>
     public class CardPackButton : CardFilterButton<int>
     {
         public CardPackButton(Button button, ButtonColorSettings colorSettings, int value, bool defaultOn)
             : base(button, colorSettings, value, defaultOn) { }
     }
 
-    /// <summary>ƒJ[ƒhƒŒƒAƒŠƒeƒB—pƒtƒBƒ‹ƒ^ƒ{ƒ^ƒ“</summary>
+    /// <summary>ã‚«ãƒ¼ãƒ‰ãƒ¬ã‚¢ãƒªãƒ†ã‚£ç”¨ãƒ•ã‚£ãƒ«ã‚¿ãƒœã‚¿ãƒ³</summary>
     public class CardRarityButton : CardFilterButton<CardRarity>
     {
         public CardRarityButton(Button button, ButtonColorSettings colorSettings, CardRarity value, bool defaultOn)
             : base(button, colorSettings, value, defaultOn) { }
     }
 
-    /// <summary>ƒJ[ƒhƒRƒXƒg—pƒtƒBƒ‹ƒ^ƒ{ƒ^ƒ“</summary>
+    /// <summary>ã‚«ãƒ¼ãƒ‰ã‚³ã‚¹ãƒˆç”¨ãƒ•ã‚£ãƒ«ã‚¿ãƒœã‚¿ãƒ³</summary>
     public class CardCostButton : CardFilterButton<int>
     {
         public CardCostButton(Button button, ButtonColorSettings colorSettings, int value, bool defaultOn)
@@ -146,73 +146,76 @@ namespace CardGame.UISystem.Controller
     }
 
     // ======================================================
-    // ƒƒCƒ“ƒNƒ‰ƒXFƒJ[ƒhƒtƒBƒ‹ƒ^E’ñ¦–‡”ŠÇ—
+    // ãƒ¡ã‚¤ãƒ³ã‚¯ãƒ©ã‚¹ï¼šã‚«ãƒ¼ãƒ‰ãƒ•ã‚£ãƒ«ã‚¿ãƒ»æç¤ºæšæ•°ç®¡ç†
     // ======================================================
 
     public class CardButtonManager
     {
         // ======================================================
-        // ’è”
+        // å®šæ•°
         // ======================================================
 
-        /// <summary>ƒJ[ƒh1í‚ ‚½‚è‚ÌÅ‘å’ñ¦‰Â”\–‡”</summary>
+        /// <summary>ã‚«ãƒ¼ãƒ‰1ç¨®ã‚ãŸã‚Šã®æœ€å¤§æç¤ºå¯èƒ½æšæ•°</summary>
         private const int MAX_AVAILABLE_COUNT = 3;
 
         // ======================================================
-        // ƒtƒB[ƒ‹ƒh
+        // ãƒ•ã‚£ãƒ¼ãƒ«ãƒ‰
         // ======================================================
 
-        /// <summary>ƒJ[ƒhƒf[ƒ^ƒx[ƒXQÆ</summary>
+        /// <summary>ã‚«ãƒ¼ãƒ‰ãƒ‡ãƒ¼ã‚¿ãƒ™ãƒ¼ã‚¹å‚ç…§</summary>
         private readonly CardDatabase _database;
 
-        /// <summary>ƒJ[ƒhƒ[ƒhƒwƒ‹ƒp[</summary>
+        /// <summary>ã‚«ãƒ¼ãƒ‰ãƒ­ãƒ¼ãƒ‰ãƒ˜ãƒ«ãƒ‘ãƒ¼</summary>
         private readonly CardDataLoader _loader;
 
-        /// <summary>ƒJ[ƒh‰Â‹§ŒäƒRƒ“ƒ|[ƒlƒ“ƒg</summary>
+        /// <summary>ã‚«ãƒ¼ãƒ‰å¯è¦–åˆ¶å¾¡ã‚³ãƒ³ãƒãƒ¼ãƒãƒ³ãƒˆ</summary>
         private readonly CardVisibilityController _visibilityController;
 
-        /// <summary>ƒNƒ‰ƒXƒ{ƒ^ƒ“ƒŠƒXƒg</summary>
+        /// <summary>ã‚¯ãƒ©ã‚¹ãƒœã‚¿ãƒ³ãƒªã‚¹ãƒˆ</summary>
         public List<CardClassButton> ClassButtons = new List<CardClassButton>();
 
-        /// <summary>ƒpƒbƒNƒ{ƒ^ƒ“ƒŠƒXƒg</summary>
+        /// <summary>ãƒ‘ãƒƒã‚¯ãƒœã‚¿ãƒ³ãƒªã‚¹ãƒˆ</summary>
         public List<CardPackButton> PackButtons = new List<CardPackButton>();
 
-        /// <summary>ƒŒƒAƒŠƒeƒBƒ{ƒ^ƒ“ƒŠƒXƒg</summary>
+        /// <summary>ãƒ¬ã‚¢ãƒªãƒ†ã‚£ãƒœã‚¿ãƒ³ãƒªã‚¹ãƒˆ</summary>
         public List<CardRarityButton> RarityButtons = new List<CardRarityButton>();
 
-        /// <summary>ƒRƒXƒgƒ{ƒ^ƒ“ƒŠƒXƒg</summary>
+        /// <summary>ã‚³ã‚¹ãƒˆãƒœã‚¿ãƒ³ãƒªã‚¹ãƒˆ</summary>
         public List<CardCostButton> CostButtons = new List<CardCostButton>();
 
-        /// <summary>ƒpƒbƒN‚²‚Æ‚Ì’ñ¦–‡”</summary>
+        /// <summary>ç”Ÿæˆæ¸ˆã¿ã®ã‚«ãƒ¼ãƒ‰è¡¨ç¤ºã‚³ãƒ³ãƒãƒ¼ãƒãƒ³ãƒˆãƒªã‚¹ãƒˆ</summary>
+        private List<CardDisplay> _cardDisplays;
+
+        /// <summary>ãƒ‘ãƒƒã‚¯ã”ã¨ã®æç¤ºæšæ•°</summary>
         private readonly Dictionary<int, int> _packAvailableCounts = new Dictionary<int, int>();
 
-        /// <summary>ƒŒƒAƒŠƒeƒB‚²‚Æ‚Ì’ñ¦–‡”</summary>
+        /// <summary>ãƒ¬ã‚¢ãƒªãƒ†ã‚£ã”ã¨ã®æç¤ºæšæ•°</summary>
         private readonly Dictionary<CardRarity, int> _rarityAvailableCounts = new Dictionary<CardRarity, int>();
 
-        /// <summary>ƒRƒXƒg‚²‚Æ‚Ì’ñ¦–‡”</summary>
+        /// <summary>ã‚³ã‚¹ãƒˆã”ã¨ã®æç¤ºæšæ•°</summary>
         private readonly Dictionary<int, int> _costAvailableCounts = new Dictionary<int, int>();
 
         // ======================================================
-        // ƒvƒƒpƒeƒB
+        // ãƒ—ãƒ­ãƒ‘ãƒ†ã‚£
         // ======================================================
 
         /// <summary>
-        /// ‘SƒpƒbƒN‚Ì’ñ¦‰Â”\–‡”«‘‚ğæ“¾‚·‚éi“Ç‚İæ‚èê—pj
+        /// å…¨ãƒ‘ãƒƒã‚¯ã®æç¤ºå¯èƒ½æšæ•°è¾æ›¸ã‚’å–å¾—ã™ã‚‹ï¼ˆèª­ã¿å–ã‚Šå°‚ç”¨ï¼‰
         /// </summary>
         public IReadOnlyDictionary<int, int> GetAllPackAvailableCounts()
         {
-            // null‘Îô‚ÆˆÀ‘S‚ÈQÆ“n‚µ
+            // nullå¯¾ç­–ã¨å®‰å…¨ãªå‚ç…§æ¸¡ã—
             if (_packAvailableCounts == null)
             {
                 return new Dictionary<int, int>();
             }
 
-            // Dictionary‚ÍIReadOnlyDictionary‚Æ‚µ‚ÄƒLƒƒƒXƒg‰Â”\
+            // Dictionaryã¯IReadOnlyDictionaryã¨ã—ã¦ã‚­ãƒ£ã‚¹ãƒˆå¯èƒ½
             return _packAvailableCounts;
         }
 
         /// <summary>
-        /// ‘SƒŒƒAƒŠƒeƒB‚Ì’ñ¦‰Â”\–‡”«‘‚ğæ“¾‚·‚éi“Ç‚İæ‚èê—pj
+        /// å…¨ãƒ¬ã‚¢ãƒªãƒ†ã‚£ã®æç¤ºå¯èƒ½æšæ•°è¾æ›¸ã‚’å–å¾—ã™ã‚‹ï¼ˆèª­ã¿å–ã‚Šå°‚ç”¨ï¼‰
         /// </summary>
         public IReadOnlyDictionary<CardRarity, int> GetAllRarityAvailableCounts()
         {
@@ -225,7 +228,7 @@ namespace CardGame.UISystem.Controller
         }
 
         /// <summary>
-        /// ‘SƒRƒXƒg‚Ì’ñ¦‰Â”\–‡”«‘‚ğæ“¾‚·‚éi“Ç‚İæ‚èê—pj
+        /// å…¨ã‚³ã‚¹ãƒˆã®æç¤ºå¯èƒ½æšæ•°è¾æ›¸ã‚’å–å¾—ã™ã‚‹ï¼ˆèª­ã¿å–ã‚Šå°‚ç”¨ï¼‰
         /// </summary>
         public IReadOnlyDictionary<int, int> GetAllCostAvailableCounts()
         {
@@ -238,18 +241,18 @@ namespace CardGame.UISystem.Controller
         }
 
         // ======================================================
-        // ƒCƒxƒ“ƒg
+        // ã‚¤ãƒ™ãƒ³ãƒˆ
         // ======================================================
 
-        /// <summary>ƒJ[ƒh•\¦XV‚É’Ê’m‚³‚ê‚éƒCƒxƒ“ƒg</summary>
+        /// <summary>ã‚«ãƒ¼ãƒ‰è¡¨ç¤ºæ›´æ–°æ™‚ã«é€šçŸ¥ã•ã‚Œã‚‹ã‚¤ãƒ™ãƒ³ãƒˆ</summary>
         public event Action OnCardsUpdated;
 
         // ======================================================
-        // ƒRƒ“ƒXƒgƒ‰ƒNƒ^
+        // ã‚³ãƒ³ã‚¹ãƒˆãƒ©ã‚¯ã‚¿
         // ======================================================
 
         /// <summary>
-        /// ƒRƒ“ƒXƒgƒ‰ƒNƒ^
+        /// ã‚³ãƒ³ã‚¹ãƒˆãƒ©ã‚¯ã‚¿
         /// </summary>
         public CardButtonManager(CardVisibilityController visibilityController, CardDatabase database)
         {
@@ -258,33 +261,103 @@ namespace CardGame.UISystem.Controller
             _loader = CardDatabaseManager.Instance.GetCardDataLoader();
         }
 
+        // ======================================================
+        // ã‚»ãƒƒã‚¿ãƒ¼
+        // ======================================================
+
+        /// <summary>
+        /// ã‚³ãƒ³ã‚¹ãƒˆãƒ©ã‚¯ã‚¿
+        /// </summary>
+        public void SetCardDisplays(List<CardDisplay> cardDisplays)
+        {
+            _cardDisplays = cardDisplays;
+        }
+
+        // ======================================================
+        // æç¤ºæšæ•°è¾æ›¸åˆæœŸåŒ–ãƒ»ç™»éŒ²å‡¦ç†
+        // ======================================================
+
+        /// <summary>
+        /// å…¨ãƒ‘ãƒƒã‚¯ãƒ»ãƒ¬ã‚¢ãƒªãƒ†ã‚£ãƒ»ã‚³ã‚¹ãƒˆã®æç¤ºæšæ•°è¾æ›¸ã‚’åˆæœŸåŒ–ã™ã‚‹ã€‚
+        /// èµ·å‹•æ™‚ã¾ãŸã¯ãƒªã‚»ãƒƒãƒˆæ™‚ã«å‘¼ã³å‡ºã™ã€‚
+        /// </summary>
+        public void InitializeAvailableCountDictionaries()
+        {
+            // --------------------------------------------------
+            // ãƒ‘ãƒƒã‚¯è¾æ›¸åˆæœŸåŒ–
+            // --------------------------------------------------
+            _packAvailableCounts.Clear();
+
+            // CardDatabaseã«ç™»éŒ²ã•ã‚Œã¦ã„ã‚‹å…¨ãƒ‘ãƒƒã‚¯IDã‚’å–å¾—
+            List<int> packIds = _database.GetAllPackIds();
+
+            // å„ãƒ‘ãƒƒã‚¯ã‚’åˆæœŸç™»éŒ²ï¼ˆ3æšï¼‰
+            for (int i = 0; i < packIds.Count; i++)
+            {
+                int id = packIds[i];
+                if (!_packAvailableCounts.ContainsKey(id))
+                {
+                    _packAvailableCounts.Add(id, MAX_AVAILABLE_COUNT);
+                }
+            }
+
+            // --------------------------------------------------
+            // ãƒ¬ã‚¢ãƒªãƒ†ã‚£è¾æ›¸åˆæœŸåŒ–
+            // --------------------------------------------------
+            _rarityAvailableCounts.Clear();
+
+            // Enum.GetValuesã‚’åˆ©ç”¨ã—ã¦å…¨ãƒ¬ã‚¢ãƒªãƒ†ã‚£åˆ—æŒ™
+            Array rarities = Enum.GetValues(typeof(CardRarity));
+            foreach (CardRarity rarity in rarities)
+            {
+                if (!_rarityAvailableCounts.ContainsKey(rarity))
+                {
+                    _rarityAvailableCounts.Add(rarity, MAX_AVAILABLE_COUNT);
+                }
+            }
+
+            // --------------------------------------------------
+            // ã‚³ã‚¹ãƒˆè¾æ›¸åˆæœŸåŒ–
+            // --------------------------------------------------
+            _costAvailableCounts.Clear();
+
+            // ã‚²ãƒ¼ãƒ å†…æœ€å¤§ã‚³ã‚¹ãƒˆå€¤ã‚’æ˜ç¤ºçš„ã«ç™»éŒ²ï¼ˆä¾‹ï¼š0ã€œ10ï¼‰
+            for (int cost = 0; cost <= 10; cost++)
+            {
+                if (!_costAvailableCounts.ContainsKey(cost))
+                {
+                    _costAvailableCounts.Add(cost, MAX_AVAILABLE_COUNT);
+                }
+            }
+        }
+        
         // ======================================================  
-        // ƒ{ƒ^ƒ““o˜^ƒƒ\ƒbƒh  
+        // ãƒœã‚¿ãƒ³ç™»éŒ²ãƒ¡ã‚½ãƒƒãƒ‰  
         // ======================================================  
 
-        /// <summary>ƒJ[ƒhƒNƒ‰ƒXƒ{ƒ^ƒ“‚ğ“o˜^</summary>  
-        /// <param name="button">“o˜^‘ÎÛƒ{ƒ^ƒ“</param>  
+        /// <summary>ã‚«ãƒ¼ãƒ‰ã‚¯ãƒ©ã‚¹ãƒœã‚¿ãƒ³ã‚’ç™»éŒ²</summary>  
+        /// <param name="button">ç™»éŒ²å¯¾è±¡ãƒœã‚¿ãƒ³</param>  
         public void RegisterClassButton(CardClassButton button)
         {
             ClassButtons.Add(button);
             button.OnFilterToggled += ApplyFilters;
         }
 
-        /// <summary>ƒJ[ƒhƒpƒbƒNƒ{ƒ^ƒ“‚ğ“o˜^</summary>  
+        /// <summary>ã‚«ãƒ¼ãƒ‰ãƒ‘ãƒƒã‚¯ãƒœã‚¿ãƒ³ã‚’ç™»éŒ²</summary>  
         public void RegisterPackButton(CardPackButton button)
         {
             PackButtons.Add(button);
             button.OnFilterToggled += ApplyFilters;
         }
 
-        /// <summary>ƒJ[ƒhƒŒƒAƒŠƒeƒBƒ{ƒ^ƒ“‚ğ“o˜^</summary>  
+        /// <summary>ã‚«ãƒ¼ãƒ‰ãƒ¬ã‚¢ãƒªãƒ†ã‚£ãƒœã‚¿ãƒ³ã‚’ç™»éŒ²</summary>  
         public void RegisterRarityButton(CardRarityButton button)
         {
             RarityButtons.Add(button);
             button.OnFilterToggled += ApplyFilters;
         }
 
-        /// <summary>ƒJ[ƒhƒRƒXƒgƒ{ƒ^ƒ“‚ğ“o˜^</summary>  
+        /// <summary>ã‚«ãƒ¼ãƒ‰ã‚³ã‚¹ãƒˆãƒœã‚¿ãƒ³ã‚’ç™»éŒ²</summary>  
         public void RegisterCostButton(CardCostButton button)
         {
             CostButtons.Add(button);
@@ -292,14 +365,14 @@ namespace CardGame.UISystem.Controller
         }
         
         // ======================================================
-        // ƒtƒBƒ‹ƒ^“K—pˆ—
+        // ãƒ•ã‚£ãƒ«ã‚¿é©ç”¨å‡¦ç†
         // ======================================================
 
         /// <summary>
-        /// ‘Sƒ{ƒ^ƒ“‚ÌƒtƒBƒ‹ƒ^‚ğ“K—p‚µ•\¦/”ñ•\¦‚ğXV
+        /// å…¨ãƒœã‚¿ãƒ³ã®ãƒ•ã‚£ãƒ«ã‚¿ã‚’é©ç”¨ã—è¡¨ç¤º/éè¡¨ç¤ºã‚’æ›´æ–°
         /// </summary>
-        /// <typeparam name="T">‰Ÿ‰º‚³‚ê‚½ƒ{ƒ^ƒ“‚ÌŒ^</typeparam>
-        /// <param name="changedButton">‰Ÿ‰º‚³‚ê‚½ƒ{ƒ^ƒ“</param>
+        /// <typeparam name="T">æŠ¼ä¸‹ã•ã‚ŒãŸãƒœã‚¿ãƒ³ã®å‹</typeparam>
+        /// <param name="changedButton">æŠ¼ä¸‹ã•ã‚ŒãŸãƒœã‚¿ãƒ³</param>
         private void ApplyFilters<T>(CardFilterButton<T> changedButton)
         {
             if (_loader == null || _visibilityController == null)
@@ -307,11 +380,11 @@ namespace CardGame.UISystem.Controller
                 return;
             }
 
-            // ‚Ü‚¸‘SƒJ[ƒh‚ğƒx[ƒX‚ÉƒŠƒXƒgì¬
+            // ã¾ãšå…¨ã‚«ãƒ¼ãƒ‰ã‚’ãƒ™ãƒ¼ã‚¹ã«ãƒªã‚¹ãƒˆä½œæˆ
             List<CardData> filteredCards = new List<CardData>(_loader.AllCardData);
 
             // --------------------------------------------------
-            // ƒNƒ‰ƒXƒtƒBƒ‹ƒ^“K—p
+            // ã‚¯ãƒ©ã‚¹ãƒ•ã‚£ãƒ«ã‚¿é©ç”¨
             // --------------------------------------------------
             List<CardClassButton> activeClassButtons = ClassButtons.FindAll(b => b.IsActive);
             if (activeClassButtons.Count > 0)
@@ -320,7 +393,7 @@ namespace CardGame.UISystem.Controller
             }
 
             // --------------------------------------------------
-            // ƒpƒbƒNƒtƒBƒ‹ƒ^“K—p
+            // ãƒ‘ãƒƒã‚¯ãƒ•ã‚£ãƒ«ã‚¿é©ç”¨
             // --------------------------------------------------
             List<CardPackButton> activePackButtons = PackButtons.FindAll(b => b.IsActive);
             if (activePackButtons.Count > 0)
@@ -329,7 +402,7 @@ namespace CardGame.UISystem.Controller
             }
 
             // --------------------------------------------------
-            // ƒŒƒAƒŠƒeƒBƒtƒBƒ‹ƒ^“K—p
+            // ãƒ¬ã‚¢ãƒªãƒ†ã‚£ãƒ•ã‚£ãƒ«ã‚¿é©ç”¨
             // --------------------------------------------------
             List<CardRarityButton> activeRarityButtons = RarityButtons.FindAll(b => b.IsActive);
             if (activeRarityButtons.Count > 0)
@@ -338,7 +411,7 @@ namespace CardGame.UISystem.Controller
             }
 
             // --------------------------------------------------
-            // ƒRƒXƒgƒtƒBƒ‹ƒ^“K—p
+            // ã‚³ã‚¹ãƒˆãƒ•ã‚£ãƒ«ã‚¿é©ç”¨
             // --------------------------------------------------
             List<CardCostButton> activeCostButtons = CostButtons.FindAll(b => b.IsActive);
             if (activeCostButtons.Count > 0)
@@ -347,12 +420,12 @@ namespace CardGame.UISystem.Controller
                 {
                     foreach (CardCostButton b in activeCostButtons)
                     {
-                        // ƒ{ƒ^ƒ“’l‚ª10‚È‚çƒRƒXƒg10ˆÈã
+                        // ãƒœã‚¿ãƒ³å€¤ãŒ10ãªã‚‰ã‚³ã‚¹ãƒˆ10ä»¥ä¸Š
                         if (b.FilterValue == 10 && cd.CardCost >= 10)
                         {
                             return true;
                         }
-                        // ’Êíˆê’v
+                        // é€šå¸¸ä¸€è‡´
                         else if (cd.CardCost == b.FilterValue)
                         {
                             return true;
@@ -363,7 +436,7 @@ namespace CardGame.UISystem.Controller
             }
 
             // --------------------------------------------------
-            // •\¦XV
+            // è¡¨ç¤ºæ›´æ–°
             // --------------------------------------------------
             _visibilityController.HideAll();
             _visibilityController.ShowCards(filteredCards);
@@ -372,11 +445,11 @@ namespace CardGame.UISystem.Controller
         }
 
         // ======================================================
-        // ’ñ¦–‡”§Œä‹¤’Êƒwƒ‹ƒp[
+        // æç¤ºæšæ•°åˆ¶å¾¡å…±é€šãƒ˜ãƒ«ãƒ‘ãƒ¼
         // ======================================================
 
         /// <summary>
-        /// w’è«‘‚Ì’l‚ğXV‚µAãŒÀ3E‰ºŒÀ0‚ÉƒNƒ‰ƒ“ƒv‚µ‚Ä•Ô‚·
+        /// æŒ‡å®šè¾æ›¸ã®å€¤ã‚’æ›´æ–°ã—ã€ä¸Šé™3ãƒ»ä¸‹é™0ã«ã‚¯ãƒ©ãƒ³ãƒ—ã—ã¦è¿”ã™
         /// </summary>
         private int UpdateAvailableCount<TKey>(Dictionary<TKey, int> dict, TKey key, int delta)
         {
@@ -392,11 +465,11 @@ namespace CardGame.UISystem.Controller
         }
 
         // ======================================================
-        // ˆêŠ‡‘€ìFƒpƒbƒN
+        // ä¸€æ‹¬æ“ä½œï¼šãƒ‘ãƒƒã‚¯
         // ======================================================
 
         /// <summary>
-        /// “Á’èƒpƒbƒN‚Ì’ñ¦‰Â”\–‡”‚ğ‘Œ¸‚³‚¹‚é
+        /// ç‰¹å®šãƒ‘ãƒƒã‚¯ã®æç¤ºå¯èƒ½æšæ•°ã‚’å¢—æ¸›ã•ã›ã‚‹
         /// </summary>
         public void SetAvailableByPack(int packNumber, int delta)
         {
@@ -407,15 +480,16 @@ namespace CardGame.UISystem.Controller
 
             int newValue = UpdateAvailableCount(_packAvailableCounts, packNumber, delta);
             _database.SetAvailableByPack(packNumber, newValue);
+            UpdateCardDisplays();
             OnCardsUpdated?.Invoke();
         }
 
         // ======================================================
-        // ˆêŠ‡‘€ìFƒŒƒAƒŠƒeƒB
+        // ä¸€æ‹¬æ“ä½œï¼šãƒ¬ã‚¢ãƒªãƒ†ã‚£
         // ======================================================
 
         /// <summary>
-        /// “Á’èƒŒƒAƒŠƒeƒB‚Ì’ñ¦‰Â”\–‡”‚ğ‘Œ¸‚³‚¹‚é
+        /// ç‰¹å®šãƒ¬ã‚¢ãƒªãƒ†ã‚£ã®æç¤ºå¯èƒ½æšæ•°ã‚’å¢—æ¸›ã•ã›ã‚‹
         /// </summary>
         public void SetAvailableByRarity(CardRarity rarity, int delta)
         {
@@ -426,15 +500,16 @@ namespace CardGame.UISystem.Controller
 
             int newValue = UpdateAvailableCount(_rarityAvailableCounts, rarity, delta);
             _database.SetAvailableByRarity(rarity, newValue);
+            UpdateCardDisplays();
             OnCardsUpdated?.Invoke();
         }
 
         // ======================================================
-        // ˆêŠ‡‘€ìFƒRƒXƒg
+        // ä¸€æ‹¬æ“ä½œï¼šã‚³ã‚¹ãƒˆ
         // ======================================================
 
         /// <summary>
-        /// “Á’èƒRƒXƒg‚Ì’ñ¦‰Â”\–‡”‚ğ‘Œ¸‚³‚¹‚é
+        /// ç‰¹å®šã‚³ã‚¹ãƒˆã®æç¤ºå¯èƒ½æšæ•°ã‚’å¢—æ¸›ã•ã›ã‚‹
         /// </summary>
         public void SetAvailableByCost(int cost, int delta)
         {
@@ -445,7 +520,40 @@ namespace CardGame.UISystem.Controller
 
             int newValue = UpdateAvailableCount(_costAvailableCounts, cost, delta);
             _database.SetAvailableByCost(cost, newValue);
+            UpdateCardDisplays();
             OnCardsUpdated?.Invoke();
+        }
+
+        /// <summary>
+        /// ç™»éŒ²ã•ã‚Œã¦ã„ã‚‹ã™ã¹ã¦ã®ã‚«ãƒ¼ãƒ‰è¡¨ç¤ºUIã‚’æ›´æ–°ã™ã‚‹ã€‚  
+        /// ç„¡åŠ¹ãƒ»ç ´æ£„æ¸ˆã¿ã®è¦ç´ ã¯ã‚¹ã‚­ãƒƒãƒ—ã™ã‚‹ã€‚
+        /// </summary>
+        private void UpdateCardDisplays()
+        {
+            // ã‚«ãƒ¼ãƒ‰é…åˆ—ãŒæœªåˆæœŸåŒ–ãªã‚‰å‡¦ç†ä¸è¦
+            if (_cardDisplays == null || _cardDisplays.Count == 0)
+            {
+                return;
+            }
+
+            // è¦ç´ ã‚’å®‰å…¨ã«åå¾©å‡¦ç†
+            foreach (CardDisplay cardDisplay in _cardDisplays)
+            {
+                // è¦ç´ ãŒnullã€ã¾ãŸã¯ç ´æ£„æ¸ˆã¿ãªã‚‰ã‚¹ã‚­ãƒƒãƒ—
+                if (cardDisplay == null)
+                {
+                    continue;
+                }
+
+                // GameObjectãŒéã‚¢ã‚¯ãƒ†ã‚£ãƒ–ãªã‚‰UIæ›´æ–°ã‚’è¡Œã‚ãªã„
+                if (!cardDisplay.gameObject.activeInHierarchy)
+                {
+                    continue;
+                }
+
+                // UIæ›´æ–°å‡¦ç†ã‚’å®Ÿè¡Œ
+                cardDisplay.QuantityController.UpdateQuantityText();
+            }
         }
     }
 }

@@ -117,8 +117,9 @@ namespace CardGame.GameSystem.Manager
                 optionCanvas.SetActive(false);
             }
 
-            // 起動時はフィルター対象をすべて非表示にする
+            // 起動時はすべて非表示にする
             SetFilterGroupActive(false);
+            SetMassChangeGroupActive(false);
         }
 
         // ======================================================

@@ -88,7 +88,7 @@ namespace CardGame.UISystem.Controller
         /// <summary>
         /// 現在の枚数をUI上に反映する
         /// </summary>
-        private void UpdateQuantityText()
+        public void UpdateQuantityText()
         {
             int current = _database.GetDeckableCopies(_cardData.CardId);
             _quantityText.text = $"{current}";
