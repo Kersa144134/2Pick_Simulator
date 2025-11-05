@@ -7,9 +7,10 @@
 //              同種カードを複数枚保持可能（カード＋枚数構造）
 // ======================================================
 
+using CardGame.CardSystem.Data;
+using CardGame.CardSystem.Manager;
 using System.Collections.Generic;
 using UnityEngine;
-using CardGame.CardSystem.Data;
 
 namespace CardGame.DeckSystem.Manager
 {
@@ -97,8 +98,9 @@ namespace CardGame.DeckSystem.Manager
 
         /// <summary>
         /// カードをピック済みリストに追加  
-        /// すでに同じカードが存在する場合は枚数を加算する  
-        /// 追加後はコスト昇順、次いで CardID 昇順でソートする
+        /// すでに同じカードが存在する場合は枚数を加算  
+        /// 追加後はコスト昇順、次いで CardID 昇順でソート  
+        /// データベースの残り提示枚数を減算し、0なら追加不可
         /// </summary>
         /// <param name="card">追加対象カード</param>
         public void AddPickedCard(CardData card)
@@ -108,8 +110,30 @@ namespace CardGame.DeckSystem.Manager
                 Debug.LogWarning("AddPickedCard：cardがnullです。");
                 return;
             }
+            if (CardDatabaseManager.Instance == null)
+            {
+                Debug.LogWarning("AddPickedCard：CardDatabaseManagerが設定されていません。追加処理を中止します。");
+                return;
+            }
 
+            // CardDatabaseを取得
+            CardDatabase database = CardDatabaseManager.Instance.GetCardDatabase();
+
+            // ======================================================
+            // 残り提示枚数をチェック
+            // ======================================================
+            int remaining = database.GetDeckableCopies(card.CardId);
+
+            // 0枚なら追加不可
+            if (remaining <= 0)
+            {
+                Debug.LogWarning($"AddPickedCard：カード {card.CardName} は残り提示枚数0のため追加できません。");
+                return;
+            }
+
+            // ======================================================
             // 既存カード検索
+            // ======================================================
             int index = _pickedCards.FindIndex(entry => entry.Card == card);
 
             if (index >= 0)
@@ -125,7 +149,14 @@ namespace CardGame.DeckSystem.Manager
                 _pickedCards.Add(new PickedCardEntry(card, 1));
             }
 
+            // ======================================================
+            // データベースの残り提示枚数を1減算
+            // ======================================================
+            database.SetDeckableCopies(card.CardId, remaining - 1);
+
+            // ======================================================
             // ソート処理を呼び出し
+            // ======================================================
             SortPickedCards();
         }
 

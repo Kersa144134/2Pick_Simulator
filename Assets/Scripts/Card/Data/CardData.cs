@@ -7,7 +7,6 @@
 //             カードIDからクラス・パック・レアリティを自動判別
 // ======================================================
 
-using System.Collections.Generic;
 using UnityEngine;
 
 namespace CardGame.CardSystem.Data
@@ -93,6 +92,12 @@ namespace CardGame.CardSystem.Data
         [SerializeField, Range(0, 3)]
         private int maxCopies = 3;
 
+        /// <summary>
+        /// カードが抽選や表示で提示可能かどうか
+        /// </summary>
+        [SerializeField]
+        private bool isAvailable = true;
+
         // ======================================================
         // プロパティ
         // ======================================================
@@ -145,10 +150,11 @@ namespace CardGame.CardSystem.Data
             get { return (CardRarity)((cardId / 10) % 10); }
         }
 
-        /// <summary>カードIDの末尾番号（重複防止用）を取得</summary>
-        public int SubId
+        /// <summary>カードの提示可能状態を取得または設定する</summary>
+        public bool IsAvailable
         {
-            get { return cardId % 10; }
+            get => isAvailable;
+            set => isAvailable = value;
         }
     }
 }

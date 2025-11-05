@@ -143,9 +143,6 @@ namespace CardGame.UISystem.Manager
         private CardDataLoader _loader = new CardDataLoader();
 
         /// <summary></summary>
-        private CardFilterGroupController _filterGroupController;
-
-        /// <summary></summary>
         private CardDisplayRefresher _displayRefresher;
 
         /// <summary>スクロール制御用コントローラ（RectTransform移動版）</summary>
@@ -175,7 +172,6 @@ namespace CardGame.UISystem.Manager
         {
             InitializeCardData();
             InitializeButtonManager();
-            InitializeFilterGroups();
             GenerateCardObjects();
 
             _scrollController = new CardScrollController(_visibleParent, scrollMoveSpeed);
@@ -191,11 +187,6 @@ namespace CardGame.UISystem.Manager
         private void Start()
         {
             RefreshDisplay();
-        }
-
-        private void OnEnable()
-        {
-            _filterGroupController?.SetAllGroupsActive(false);
         }
 
         private void Update()
@@ -276,21 +267,6 @@ namespace CardGame.UISystem.Manager
                 display.Initialize(data, _cardDatabase);
                 _cardDisplays.Add(display);
             }
-        }
-
-        /// <summary>フィルタグループ配列を構築し、初期非表示にする</summary>
-        private void InitializeFilterGroups()
-        {
-            _filterGroups = new GameObject[]
-            {
-                classButtonGroup,
-                packButtonGroup,
-                rarityButtonGroup,
-                costButtonGroup,
-                filterPanel
-            };
-
-            _filterGroupController = new CardFilterGroupController(_filterGroups);
         }
 
         // ======================================================

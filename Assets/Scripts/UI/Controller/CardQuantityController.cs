@@ -66,18 +66,18 @@ namespace CardGame.UISystem.Controller
         /// <summary>＋ボタン押下時の処理</summary>
         private void OnPlusClicked()
         {
-            int current = _database.GetMaxCopies(_cardData.CardId);
+            int current = _database.GetDeckableCopies(_cardData.CardId);
 
-            _database.SetMaxCopies(_cardData.CardId, current + 1);
+            _database.SetDeckableCopies(_cardData.CardId, current + 1);
             UpdateQuantityText();
         }
 
         /// <summary>−ボタン押下時の処理</summary>
         private void OnMinusClicked()
         {
-            int current = _database.GetMaxCopies(_cardData.CardId);
+            int current = _database.GetDeckableCopies(_cardData.CardId);
 
-            _database.SetMaxCopies(_cardData.CardId, current - 1);
+            _database.SetDeckableCopies(_cardData.CardId, current - 1);
             UpdateQuantityText();
         }
 
@@ -90,7 +90,7 @@ namespace CardGame.UISystem.Controller
         /// </summary>
         private void UpdateQuantityText()
         {
-            int current = _database.GetMaxCopies(_cardData.CardId);
+            int current = _database.GetDeckableCopies(_cardData.CardId);
             _quantityText.text = $"{current}";
         }
     }
