@@ -10,6 +10,7 @@
 
 using UnityEngine;
 using UnityEngine.UI;
+using CardGame.CardSystem.Manager;
 using CardGame.DeckSystem.Manager;
 
 namespace CardGame.GameSystem.Manager
@@ -120,6 +121,8 @@ namespace CardGame.GameSystem.Manager
             // ‹N“®Žž‚Í‚·‚×‚Ä”ñ•\Ž¦‚É‚·‚é
             SetFilterGroupActive(false);
             SetMassChangeGroupActive(false);
+
+            CardDatabaseManager.Instance.GetCardDatabase().ResetAllDeckableCopies();
         }
 
         // ======================================================

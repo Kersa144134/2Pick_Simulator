@@ -198,5 +198,28 @@ namespace CardGame.CardSystem.Data
                 }
             }
         }
+
+        /// <summary>
+        /// 全てのカードの提示可能枚数を初期値（カードごとの最大値）にリセットする。
+        /// </summary>
+        public void ResetAllDeckableCopies()
+        {
+            // 全カードを走査して初期値に戻す
+            foreach (CardData data in cardList)
+            {
+                // 各カードが保持するデフォルト最大値を使用
+                int resetValue = data.MaxCopies;
+
+                // テーブルに既に存在する場合は上書き、なければ新規登録
+                if (deckableCopiesTable.ContainsKey(data.CardId))
+                {
+                    deckableCopiesTable[data.CardId] = resetValue;
+                }
+                else
+                {
+                    deckableCopiesTable.Add(data.CardId, resetValue);
+                }
+            }
+        }
     }
 }
