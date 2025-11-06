@@ -18,6 +18,12 @@ namespace CardGame.PickSystem.Controller
     public class ClassCardPickController
     {
         // ======================================================
+        // コンポーネント参照
+        // ======================================================
+
+        private CardRandomPicker _picker = new CardRandomPicker();
+
+        // ======================================================
         // パブリックメソッド
         // ======================================================
 
@@ -30,7 +36,7 @@ namespace CardGame.PickSystem.Controller
         /// <returns>抽選されたカードデータのリスト（最大2枚）</returns>
         public List<CardData> PickInitialClassCards(CardDatabase db, CardData.CardClass cardClass)
         {
-            List<CardData> cardDatas = CardRandomPicker.GetRandomCardsByClassAndRarity(
+            List<CardData> cardDatas = _picker.GetRandomCardsByClassAndRarity(
                 db,
                 2,
                 new CardData.CardClass[] { CardData.CardClass.Neutral, cardClass },
@@ -50,7 +56,7 @@ namespace CardGame.PickSystem.Controller
         /// <returns>抽選されたカードデータのリスト（最大4枚）</returns>
         public List<CardData> PickMainClassCards(CardDatabase db, CardData.CardClass cardClass, CardData.CardRarity[] cardRarities)
         {
-            List<CardData> cardDatas = CardRandomPicker.GetRandomCardsByClassAndRarity(
+            List<CardData> cardDatas = _picker.GetRandomCardsByClassAndRarity(
                 db,
                 4,
                 new CardData.CardClass[] { CardData.CardClass.Neutral, cardClass },

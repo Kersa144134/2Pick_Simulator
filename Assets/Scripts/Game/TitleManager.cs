@@ -2,10 +2,10 @@
 // TitleManager.cs
 // 作成者     : 高橋一翔
 // 作成日時   : 2025-11-03
-// 更新日時   : 2025-11-05
+// 更新日時   : 2025-11-06
 // 概要       : タイトル画面の管理クラス
-//              START / OPTION / FILTER ボタン押下に応じたキャンバスおよび表示制御
-//              OPTIONキャンバス用の戻るボタンでタイトル画面に復帰
+//              START / OPTION / FILTER / MASSCHANGE / WEIGHTCHANGE / REDRAWCHANGE
+//              各ボタン押下に応じたキャンバスおよび詳細オプション表示を制御
 // ======================================================
 
 using UnityEngine;
@@ -17,111 +17,130 @@ namespace CardGame.GameSystem.Manager
 {
     /// <summary>
     /// タイトル画面管理クラス  
-    /// START / OPTION / FILTER ボタン押下に応じて各キャンバス・UIを制御する。
+    /// START / OPTION / FILTER / MASSCHANGE / WEIGHTCHANGE / REDRAWCHANGE ボタン押下時の
+    /// 各キャンバス・UIの表示状態を統一管理する。
     /// </summary>
     public class TitleManager : MonoBehaviour
     {
         // ======================================================
-        // インスペクタ設定
+        // 列挙体定義
         // ======================================================
 
+        /// <summary>
+        /// 詳細オプションの状態  
+        /// 同時に一つのみ有効（None状態時は全て非表示）
+        /// </summary>
+        private enum DetailedOptionState
+        {
+            None,
+            Filter,
+            MassChange,
+            WeightChange,
+            RedrawChange
+        }
+
         [Header("キャンバス設定")]
+
         [SerializeField]
-        /// <summary>タイトル画面用メインキャンバス</summary>
+        /// <summary>タイトル画面用のメインキャンバス</summary>
         private GameObject titleCanvas;
 
         [SerializeField]
-        /// <summary>クラス選択用キャンバス</summary>
+        /// <summary>クラス選択画面用キャンバス</summary>
         private GameObject classSelectCanvas;
 
         [SerializeField]
-        /// <summary>オプション設定用キャンバス</summary>
+        /// <summary>オプション設定画面用キャンバス</summary>
         private GameObject optionCanvas;
 
-        [SerializeField]
-        /// <summary>フィルター用オブジェクト群（表示ON/OFF対象）</summary>
-        private GameObject[] filterGroup;
+
+        [Header("詳細オプションオブジェクト")]
 
         [SerializeField]
-        /// <summary>一括変更用オブジェクト群（表示ON/OFF対象）</summary>
-        private GameObject[] massChangeGroup;
+        /// <summary>詳細オプション全体を覆うパネル（None以外の状態で表示）</summary>
+        private GameObject detailedOptionPanel;
+        
+        [SerializeField]
+        /// <summary>フィルター設定UIをまとめたオブジェクト</summary>
+        private GameObject filterObj;
+
+        [SerializeField]
+        /// <summary>一括変更設定UIをまとめたオブジェクト</summary>
+        private GameObject massChangeObj;
+
+        [SerializeField]
+        /// <summary>抽選倍率変更UIをまとめたオブジェクト</summary>
+        private GameObject weightChangeObj;
+
+        [SerializeField]
+        /// <summary>再抽選回数変更UIをまとめたオブジェクト</summary>
+        private GameObject redrawChangeObj;
+
 
         [Header("ボタン設定")]
+
         [SerializeField]
-        /// <summary>Startボタン</summary>
+        /// <summary>ゲーム開始用の Start ボタン</summary>
         private Button startButton;
 
         [SerializeField]
-        /// <summary>Optionボタン</summary>
+        /// <summary>オプション画面を開く Option ボタン</summary>
         private Button optionButton;
 
         [SerializeField]
-        /// <summary>Optionキャンバス用の戻るボタン</summary>
+        /// <summary>オプション画面からタイトル画面へ戻る Back ボタン</summary>
         private Button optionBackButton;
 
         [SerializeField]
-        /// <summary>Filterボタン</summary>
+        /// <summary>フィルター設定を開閉する Filter ボタン</summary>
         private Button filterButton;
 
         [SerializeField]
-        /// <summary>MassChangeボタン</summary>
+        /// <summary>一括変更設定を開閉する MassChange ボタン</summary>
         private Button massChangeButton;
+
+        [SerializeField]
+        /// <summary>抽選倍率変更UIを開閉する WeightChange ボタン</summary>
+        private Button weightChangeButton;
+
+        [SerializeField]
+        /// <summary>再抽選回数変更UIを開閉する RedrawChange ボタン</summary>
+        private Button redrawChangeButton;
 
         // ======================================================
         // フィールド
         // ======================================================
 
-        /// <summary>フィルターグループが現在表示中かどうかを示すフラグ</summary>
-        private bool _isFilterActive = false;
-
-        /// <summary>一括変更グループが現在表示中かどうかを示すフラグ</summary>
-        private bool _isMassChangeActive = false;
+        /// <summary>現在有効な詳細オプション状態</summary>
+        private DetailedOptionState _currentOptionState = DetailedOptionState.None;
 
         // ======================================================
         // Unityイベント
         // ======================================================
 
-        /// <summary>
-        /// 初期化処理  
-        /// ボタンのクリックイベント登録および初期表示設定を行う。
-        /// </summary>
         private void Start()
         {
-            // STARTボタン押下イベント登録
+            // 各種ボタンにクリックイベントを登録
             startButton.onClick.AddListener(OnStartButtonClicked);
-
-            // OPTIONボタン押下イベント登録
             optionButton.onClick.AddListener(OnOptionButtonClicked);
-
-            // FILTERボタン押下イベント登録
-            filterButton.onClick.AddListener(OnFilterButtonClicked);
-
-            // MASSCHANGEボタン押下イベント登録
-            massChangeButton.onClick.AddListener(OnMassChangeButtonClicked);
-
-            // OPTIONキャンバス用戻るボタン押下イベント登録
             optionBackButton.onClick.AddListener(OnOptionBackButtonClicked);
+            filterButton.onClick.AddListener(() => OnDetailedOptionButtonClicked(DetailedOptionState.Filter));
+            massChangeButton.onClick.AddListener(() => OnDetailedOptionButtonClicked(DetailedOptionState.MassChange));
+            weightChangeButton.onClick.AddListener(() => OnDetailedOptionButtonClicked(DetailedOptionState.WeightChange));
+            redrawChangeButton.onClick.AddListener(() => OnDetailedOptionButtonClicked(DetailedOptionState.RedrawChange));
 
-            // 起動時はタイトル画面のみ表示
-            if (titleCanvas != null)
-            {
-                titleCanvas.SetActive(true);
-            }
+            // 起動時のキャンバス表示設定
+            if (titleCanvas != null) titleCanvas.SetActive(true);
+            if (classSelectCanvas != null) classSelectCanvas.SetActive(false);
+            if (optionCanvas != null) optionCanvas.SetActive(false);
 
-            if (classSelectCanvas != null)
-            {
-                classSelectCanvas.SetActive(false);
-            }
+            // パネルを非表示
+            detailedOptionPanel.SetActive(false);
 
-            if (optionCanvas != null)
-            {
-                optionCanvas.SetActive(false);
-            }
+            // 全詳細オプションを初期非表示
+            SetAllDetailedOptionsActive(false);
 
-            // 起動時はすべて非表示にする
-            SetFilterGroupActive(false);
-            SetMassChangeGroupActive(false);
-
+            // 初期化処理：デッキ可能枚数リセット
             CardDatabaseManager.Instance.GetCardDatabase().ResetAllDeckableCopies();
         }
 
@@ -131,132 +150,102 @@ namespace CardGame.GameSystem.Manager
 
         /// <summary>
         /// STARTボタン押下時処理  
-        /// タイトルキャンバスを非表示にしてクラス選択画面を表示する。
+        /// タイトル画面を閉じ、クラス選択画面を表示。
         /// </summary>
         private void OnStartButtonClicked()
         {
-            if (titleCanvas != null)
-            {
-                titleCanvas.SetActive(false);
-            }
+            titleCanvas?.SetActive(false);
+            classSelectCanvas?.SetActive(true);
 
-            if (classSelectCanvas != null)
-            {
-                classSelectCanvas.SetActive(true);
-            }
-
-            // デッキ情報をリセット
+            // デッキ情報リセット
             DeckListManager.Instance.ResetDeck();
         }
 
         /// <summary>
         /// OPTIONボタン押下時処理  
-        /// タイトルキャンバスを非表示にしてオプション画面を表示する。
+        /// タイトル画面を閉じ、オプション画面を表示。
         /// </summary>
         private void OnOptionButtonClicked()
         {
-            if (titleCanvas != null)
-            {
-                titleCanvas.SetActive(false);
-            }
-
-            if (optionCanvas != null)
-            {
-                optionCanvas.SetActive(true);
-            }
+            titleCanvas?.SetActive(false);
+            optionCanvas?.SetActive(true);
         }
 
         /// <summary>
-        /// OPTIONキャンバスの戻るボタン押下時処理  
-        /// OptionCanvas を非表示にしてタイトルキャンバスを再表示する。
+        /// OPTION戻るボタン押下時処理  
+        /// オプション画面を閉じ、タイトル画面を再表示。
         /// </summary>
         private void OnOptionBackButtonClicked()
         {
-            if (optionCanvas != null)
-            {
-                optionCanvas.SetActive(false);
-            }
-
-            if (titleCanvas != null)
-            {
-                titleCanvas.SetActive(true);
-            }
+            optionCanvas?.SetActive(false);
+            titleCanvas?.SetActive(true);
         }
 
         /// <summary>
-        /// FILTERボタン押下時処理  
-        /// filterGroup 内の全オブジェクトを一括で ON / OFF 切り替える。
+        /// 詳細オプションボタン押下時処理  
+        /// 既に同じ状態なら解除、異なる場合は切り替えを行う。
         /// </summary>
-        private void OnFilterButtonClicked()
+        /// <param name="nextState">押下されたボタンに対応する状態</param>
+        private void OnDetailedOptionButtonClicked(DetailedOptionState nextState)
         {
-            // 現在の状態を反転
-            _isFilterActive = !_isFilterActive;
-
-            // 状態に応じて一括反映
-            SetFilterGroupActive(_isFilterActive);
-
-            // 一括変更状態を強制終了
-            _isMassChangeActive = false;
-            SetMassChangeGroupActive(_isMassChangeActive);
-        }
-
-        /// <summary>
-        /// フィルター対象群の表示状態を一括設定する。
-        /// </summary>
-        /// <param name="isActive">表示状態（trueで表示 / falseで非表示）</param>
-        private void SetFilterGroupActive(bool isActive)
-        {
-            if (filterGroup == null || filterGroup.Length == 0)
+            // 同じボタンを再度押した場合は解除
+            if (_currentOptionState == nextState)
             {
+                _currentOptionState = DetailedOptionState.None;
+                UpdateDetailedOptionDisplay();
                 return;
             }
 
-            // 各オブジェクトのアクティブ状態を一括設定
-            foreach (GameObject obj in filterGroup)
+            // 状態を更新
+            _currentOptionState = nextState;
+
+            // 状態に応じて表示切替
+            UpdateDetailedOptionDisplay();
+        }
+
+        /// <summary>
+        /// 詳細オプション表示を状態に応じて切り替える。
+        /// </summary>
+        private void UpdateDetailedOptionDisplay()
+        {
+            // パネルを表示
+            detailedOptionPanel.SetActive(true);
+            
+            // すべてのグループをいったん非表示
+            SetAllDetailedOptionsActive(false);
+
+            // 現在の状態に応じて対象グループのみ表示
+            switch (_currentOptionState)
             {
-                if (obj != null)
-                {
-                    obj.SetActive(isActive);
-                }
+                case DetailedOptionState.Filter:
+                    filterObj.SetActive(true);
+                    break;
+                case DetailedOptionState.MassChange:
+                    massChangeObj.SetActive(true);
+                    break;
+                case DetailedOptionState.WeightChange:
+                    weightChangeObj.SetActive(true);
+                    break;
+                case DetailedOptionState.RedrawChange:
+                    redrawChangeObj.SetActive(true);
+                    break;
+                case DetailedOptionState.None:
+                default:
+                    detailedOptionPanel.SetActive(false);
+                    break;
             }
         }
 
         /// <summary>
-        /// MASSCHANGEボタン押下時処理  
-        /// massChangeGroup 内の全オブジェクトを一括で ON / OFF 切り替える。
+        /// 全ての詳細オプショングループを非表示に設定。
         /// </summary>
-        private void OnMassChangeButtonClicked()
+        /// <param name="isActive">表示状態（通常false）</param>
+        private void SetAllDetailedOptionsActive(bool isActive)
         {
-            // 現在の状態を反転
-            _isMassChangeActive = !_isMassChangeActive;
-
-            // 状態に応じて一括反映
-            SetMassChangeGroupActive(_isMassChangeActive);
-
-            // フィルター状態を強制終了
-            _isFilterActive = false;
-            SetFilterGroupActive(_isFilterActive);
-        }
-
-        /// <summary>
-        /// 一括変更対象群の表示状態を一括設定する。
-        /// </summary>
-        /// <param name="isActive">表示状態（trueで表示 / falseで非表示）</param>
-        private void SetMassChangeGroupActive(bool isActive)
-        {
-            if (massChangeGroup == null || massChangeGroup.Length == 0)
-            {
-                return;
-            }
-
-            // 各オブジェクトのアクティブ状態を一括設定
-            foreach (GameObject obj in massChangeGroup)
-            {
-                if (obj != null)
-                {
-                    obj.SetActive(isActive);
-                }
-            }
+            filterObj.SetActive(isActive);
+            massChangeObj.SetActive(isActive);
+            weightChangeObj.SetActive(isActive);
+            redrawChangeObj.SetActive(isActive);
         }
     }
 }
