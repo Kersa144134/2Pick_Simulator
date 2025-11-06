@@ -204,6 +204,11 @@ namespace CardGame.UISystem.Manager
             CardData.CardClass selectedClass = classButtonDataArray[_selectedClassIndex].Class;
 
             // --------------------------------------------------
+            // ƒvƒŒƒC’†‚ÌÄ’Š‘I‰ñ”‚ğ‰Šú‰»
+            // --------------------------------------------------
+            CardDatabaseManager.Instance.GetCardDatabase().SetCurrentRedrawCount(selectedClass);
+
+            // --------------------------------------------------
             // DeckListManager‚Ö“o˜^
             // --------------------------------------------------
             DeckListManager.Instance.SelectedClass = selectedClass;

@@ -8,16 +8,17 @@
 // ======================================================
 
 using CardGame.CardSystem.Data;
+using CardGame.CardSystem.Manager;
 using CardGame.DeckSystem.Manager;
 using CardGame.PickSystem.Manager;
 using CardGame.UISystem.Controller;
 using CardGame.UISystem.Manager;
 using System;
 using System.Collections.Generic;
+using TMPro;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
-using TMPro;
 
 namespace CardGame.GameSystem.Manager
 {
@@ -38,7 +39,7 @@ namespace CardGame.GameSystem.Manager
             Left,
             Right
         }
-        
+
         // ======================================================
         // 構造体定義
         // ======================================================
@@ -63,7 +64,7 @@ namespace CardGame.GameSystem.Manager
         [SerializeField]
         /// <summary>カード表示を管理するコントローラ</summary>
         private PickCardDisplayManager _pickCardDisplayManager;
-        
+
         [Header("キャンバス設定")]
 
         [SerializeField]
@@ -108,6 +109,10 @@ namespace CardGame.GameSystem.Manager
         [SerializeField]
         /// <summary>現在の総カード枚数を表示する TextMeshPro テキスト</summary>
         private TMP_Text deckCountText;
+
+        [SerializeField]
+        /// <summary>再抽選残回数表示用テキスト</summary>
+        private Text redrawCountText;
 
         [SerializeField]
         [Tooltip("コストごとのカード枚数表示用 Text リスト（0～10）")]
@@ -179,71 +184,14 @@ namespace CardGame.GameSystem.Manager
 
             // 抽選回数のリセット
             _pickSequenceManager.ResetPickSequence();
-            
+
             // 初回抽選実行
             ExecuteDraw();
 
             // 初回UI更新
             UpdatePickAndCardCountText();
             UpdateCostCountsTexts();
-        }
-
-        // ======================================================
-        // プライベートメソッド
-        // ======================================================
-
-        /// <summary>
-        /// 通常の抽選
-        /// </summary>
-        private void ExecuteDraw()
-        {
-            DrawCards(() => _pickSequenceManager.GetNextPickRarities());
-        }
-
-        /// <summary>
-        /// 再抽選
-        /// </summary>
-        private void ExecuteRedraw()
-        {
-            DrawCards(() => _pickSequenceManager.GetRedrawPickRarities());
-        }
-
-        /// <summary>
-        /// ピック実行処理  
-        /// 指定方向のカードを DeckListManager に登録し、ピック進行と再抽選を行う。  
-        /// 上限到達時は指定シーンへ遷移する。
-        /// </summary>
-        /// <param name="pick">選択されたピック方向（左 or 右）</param>
-        private void ExecutePick(PickSide pick)
-        {
-            // 指定方向に対応するカードリストを取得
-            List<CardData> cards = _pickedCards[pick];
-
-            // 各カードを DeckListManager に登録
-            foreach (CardData card in cards)
-            {
-                if (card != null)
-                {
-                    DeckListManager.Instance.AddPickedCard(card);
-                }
-            }
-
-            // ピック回数を進める
-            _pickSequenceManager.IncrementPick();
-
-            // ピック上限チェック
-            if (_pickSequenceManager.GetRemainingPickCount() <= 0)
-            {
-                SceneManager.LoadScene(targetSceneName);
-                return;
-            }
-
-            // UI更新
-            UpdatePickAndCardCountText();
-            UpdateCostCountsTexts();
-
-            // 新たなピック候補を再抽選
-            ExecuteDraw();
+            UpdateRedrawCountText();
         }
 
         /// <summary>
@@ -320,7 +268,109 @@ namespace CardGame.GameSystem.Manager
         }
 
         // ======================================================
-        // 背景切り替え関連
+        // Pick/Draw/Redraw関連
+        // ======================================================
+
+        /// <summary>
+        /// ピック実行処理  
+        /// 指定方向のカードを DeckListManager に登録し、ピック進行と再抽選を行う。  
+        /// 上限到達時は指定シーンへ遷移する。
+        /// </summary>
+        /// <param name="pick">選択されたピック方向（左 or 右）</param>
+        private void ExecutePick(PickSide pick)
+        {
+            // 指定方向に対応するカードリストを取得
+            List<CardData> cards = _pickedCards[pick];
+
+            // 各カードを DeckListManager に登録
+            foreach (CardData card in cards)
+            {
+                if (card != null)
+                {
+                    DeckListManager.Instance.AddPickedCard(card);
+                }
+            }
+
+            // ピック回数を進める
+            _pickSequenceManager.IncrementPick();
+
+            // ピック上限チェック
+            if (_pickSequenceManager.GetRemainingPickCount() <= 0)
+            {
+                SceneManager.LoadScene(targetSceneName);
+                return;
+            }
+
+            // UI更新
+            UpdatePickAndCardCountText();
+            UpdateCostCountsTexts();
+
+            // 新たなピック候補を再抽選
+            ExecuteDraw();
+        }
+
+        /// <summary>
+        /// 通常の抽選
+        /// </summary>
+        private void ExecuteDraw()
+        {
+            DrawCards(() => _pickSequenceManager.GetNextPickRarities());
+        }
+
+        /// <summary>
+        /// 再抽選
+        /// </summary>
+        private void ExecuteRedraw()
+        {
+            CardDatabase db = CardDatabaseManager.Instance.GetCardDatabase();
+
+            if (db.GetCurrentRedrawCount() <= 0)
+            {
+                Debug.Log("[PickManager] 再抽選回数が残っていません。");
+                return;
+            }
+
+            // 再抽選回数を1減らす
+            db.ConsumeRedraw();
+
+            // UI更新
+            UpdateRedrawCountText();
+
+            // 新たにカード抽選
+            DrawCards(() => _pickSequenceManager.GetRedrawPickRarities());
+        }
+
+        /// <summary>
+        /// カード抽選処理共通メソッド  
+        /// 指定のレアリティ配列取得関数を使って4枚のカードを抽選し、左右2枚ずつに振り分ける。
+        /// </summary>
+        /// <param name="getRarities">抽選に使うレアリティ配列を返す関数</param>
+        private void DrawCards(Func<CardData.CardRarity[]> getRarities)
+        {
+            if (getRarities == null)
+            {
+                Debug.LogWarning("DrawCards: getRarities が null です。");
+                return;
+            }
+
+            // レアリティ配列を取得
+            CardData.CardRarity[] rarities = getRarities();
+
+            // メインクラス候補カードを4枚抽選
+            List<CardData> pickCards = _pickCardDisplayManager.PickMainClassCards(rarities);
+
+            // 前回の抽選結果を初期化
+            _pickedCards.Clear();
+
+            // 左側に2枚登録
+            _pickedCards.Add(PickSide.Left, new List<CardData> { pickCards[0], pickCards[1] });
+
+            // 右側に2枚登録
+            _pickedCards.Add(PickSide.Right, new List<CardData> { pickCards[2], pickCards[3] });
+        }
+
+        // ======================================================
+        // UI更新関連
         // ======================================================
 
         /// <summary>
@@ -410,37 +460,13 @@ namespace CardGame.GameSystem.Manager
             Debug.LogWarning($"選択クラス {selectedClass} に対応する背景スプライトが設定されていません。");
         }
 
-        // ======================================================
-        // ヘルパーメソッド
-        // ======================================================
-
         /// <summary>
-        /// カード抽選処理共通メソッド  
-        /// 指定のレアリティ配列取得関数を使って4枚のカードを抽選し、左右2枚ずつに振り分ける。
+        /// 再抽選回数テキストを更新する
         /// </summary>
-        /// <param name="getRarities">抽選に使うレアリティ配列を返す関数</param>
-        private void DrawCards(Func<CardData.CardRarity[]> getRarities)
+        private void UpdateRedrawCountText()
         {
-            if (getRarities == null)
-            {
-                Debug.LogWarning("DrawCards: getRarities が null です。");
-                return;
-            }
-
-            // レアリティ配列を取得
-            CardData.CardRarity[] rarities = getRarities();
-
-            // メインクラス候補カードを4枚抽選
-            List<CardData> pickCards = _pickCardDisplayManager.PickMainClassCards(rarities);
-
-            // 前回の抽選結果を初期化
-            _pickedCards.Clear();
-
-            // 左側に2枚登録
-            _pickedCards.Add(PickSide.Left, new List<CardData> { pickCards[0], pickCards[1] });
-
-            // 右側に2枚登録
-            _pickedCards.Add(PickSide.Right, new List<CardData> { pickCards[2], pickCards[3] });
+            int currentRedraw = CardDatabaseManager.Instance.GetCardDatabase().GetCurrentRedrawCount();
+            redrawCountText.text = $"あと {currentRedraw} 回";
         }
     }
 }

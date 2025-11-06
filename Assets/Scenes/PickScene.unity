@@ -1557,6 +1557,7 @@ MonoBehaviour:
   redrawingButton: {fileID: 902877538}
   pickCountText: {fileID: 1755365537}
   deckCountText: {fileID: 1337713200}
+  redrawCountText: {fileID: 1543993853}
   costCountsTexts:
   - {fileID: 180355692}
   - {fileID: 1432865666}
