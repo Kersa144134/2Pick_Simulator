@@ -10,11 +10,11 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 3681b0a88746de6478dc0f96bd7d091f, type: 3}
-  m_Name: 20010
+  m_Name: 00010
   m_EditorClassIdentifier: 
-  CardImage: {fileID: 21300000, guid: 8cc2e129a508d8e43b8e485eff33296f, type: 3}
-  cardId: 20010
-  cardCost: 2
-  cardName: "\u738B\u5BB6\u306E\u5FA1\u8005"
+  CardImage: {fileID: 21300000, guid: 03d2c87e69d750343b024a3710951305, type: 3}
+  cardId: 10
+  cardCost: 0
+  cardName: "\u714C\u97FF\u306E\u4F7F\u8005\u30FB\u30A2\u30F3\u30EA\u30A8\u30C3\u30C8"
   cardText: 
   maxCopies: 0

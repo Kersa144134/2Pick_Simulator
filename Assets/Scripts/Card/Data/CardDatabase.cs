@@ -26,7 +26,7 @@ namespace CardGame.CardSystem.Data
         private const int DEFAULT_MAX_DECKABLE_COPIES = 3;
 
         /// <summary>クラスごとの再抽選回数のデフォルト値</summary>
-        private const int DEFAULT_REDRAW_COUNT = 3;
+        private const int DEFAULT_REDRAW_COUNT = 2;
 
         // ======================================================
         // フィールド
@@ -54,9 +54,22 @@ namespace CardGame.CardSystem.Data
         /// <summary>ニュートラルカードの出現補正倍率</summary>
         private float _neutralCardWeight = 0.1f;
 
-        /// <summary>クラスごとの再抽選可能回数テーブル</summary>
-        private Dictionary<CardData.CardClass, int> _redrawCountTable = new Dictionary<CardData.CardClass, int>();
+        /// <summary>クラスごとのデフォルト再抽選回数テーブル</summary>
+        private readonly Dictionary<CardData.CardClass, int> _defaultRedrawCountTable =
+            new Dictionary<CardData.CardClass, int>()
+            {
+                { CardData.CardClass.Elf, 3 },
+                { CardData.CardClass.Royal, 3 },
+                { CardData.CardClass.Witch, 5 },
+                { CardData.CardClass.Dragon, 2 },
+                { CardData.CardClass.Nightmare, 2 },
+                { CardData.CardClass.Bishop, 5 },
+                { CardData.CardClass.Nemesis, 2 }
+            };
 
+        /// <summary>クラスごとの現在の再抽選可能回数テーブル</summary>
+        private Dictionary<CardData.CardClass, int> _redrawCountTable = new Dictionary<CardData.CardClass, int>();
+        
         /// <summary>プレイ中に消費する再抽選回数</summary>
         private int _currentRedrawCount;
 
@@ -153,10 +166,17 @@ namespace CardGame.CardSystem.Data
                 _deckableCopiesTable[data.CardId] = data.MaxCopies;
             }
 
-            // クラスごとの再抽選回数を初期化
+            // クラスごとの再抽選回数をデフォルト値テーブルから初期化
             foreach (CardData.CardClass cardClass in System.Enum.GetValues(typeof(CardData.CardClass)))
             {
-                _redrawCountTable[cardClass] = DEFAULT_REDRAW_COUNT;
+                if (_defaultRedrawCountTable.ContainsKey(cardClass))
+                {
+                    _redrawCountTable[cardClass] = _defaultRedrawCountTable[cardClass];
+                }
+                else
+                {
+                    _redrawCountTable[cardClass] = DEFAULT_REDRAW_COUNT;
+                }
             }
         }
 

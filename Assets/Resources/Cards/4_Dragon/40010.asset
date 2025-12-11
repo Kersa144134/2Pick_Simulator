@@ -17,4 +17,4 @@ MonoBehaviour:
   cardCost: 3
   cardName: "\u7ADC\u306E\u5553\u793A"
   cardText: 
-  maxCopies: 3
+  maxCopies: 0

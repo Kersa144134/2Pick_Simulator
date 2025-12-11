@@ -63,7 +63,6 @@ namespace CardGame.CardSystem.Data
 
         /// <summary>
         /// カードを一意に識別する5桁整数ID
-        /// 例：21342 → ロイヤル / パック13 / ゴールド / 番号2
         /// </summary>
         [SerializeField]
         private int cardId = 0;
