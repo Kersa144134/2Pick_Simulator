@@ -7,18 +7,18 @@
 //             PickCanvas / DeckCanvas の切り替え
 // ======================================================
 
-using CardGame.CardSystem.Data;
-using CardGame.CardSystem.Manager;
-using CardGame.DeckSystem.Manager;
-using CardGame.PickSystem.Manager;
-using CardGame.UISystem.Controller;
-using CardGame.UISystem.Manager;
 using System;
 using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
+using CardGame.CardSystem.Data;
+using CardGame.CardSystem.Manager;
+using CardGame.DeckSystem.Manager;
+using CardGame.PickSystem.Manager;
+using CardGame.UISystem.Controller;
+using CardGame.UISystem.Manager;
 
 namespace CardGame.GameSystem.Manager
 {
@@ -118,6 +118,10 @@ namespace CardGame.GameSystem.Manager
         [Tooltip("コストごとのカード枚数表示用 Text リスト（0～10）")]
         private List<Text> costCountsTexts = new List<Text>();
 
+        [SerializeField]
+        [Tooltip("コストごとのカード枚数表示用ゲージリスト（0～10）")]
+        private List<RectTransform> costCountsGuages = new List<RectTransform>();
+
         [Header("背景設定")]
 
         [SerializeField]
@@ -159,6 +163,13 @@ namespace CardGame.GameSystem.Manager
         private Dictionary<PickSide, List<CardData>> _pickedCards = new Dictionary<PickSide, List<CardData>>();
 
         // ======================================================
+        // 定数
+        // ======================================================
+
+        /// <summary>1枚あたりのゲージ伸長量</summary>
+        private const float CARD_GAUGE_HEIGHT_PER_CARD = 15f;
+
+        // ======================================================
         // Unityイベント
         // ======================================================
 
@@ -190,7 +201,7 @@ namespace CardGame.GameSystem.Manager
 
             // 初回UI更新
             UpdatePickAndCardCountText();
-            UpdateCostCountsTexts();
+            UpdateCostCounts();
             UpdateRedrawCountText();
         }
 
@@ -303,7 +314,7 @@ namespace CardGame.GameSystem.Manager
 
             // UI更新
             UpdatePickAndCardCountText();
-            UpdateCostCountsTexts();
+            UpdateCostCounts();
 
             // 新たなピック候補を再抽選
             ExecuteDraw();
@@ -398,9 +409,9 @@ namespace CardGame.GameSystem.Manager
         }
 
         /// <summary>
-        /// デッキ内のコストごとのカード枚数を更新して TextMeshPro に反映する
+        /// デッキ内のコストごとのカード枚数を更新して反映する
         /// </summary>
-        private void UpdateCostCountsTexts()
+        private void UpdateCostCounts()
         {
             if (DeckListManager.Instance == null || costCountsTexts.Count == 0)
             {
@@ -424,13 +435,28 @@ namespace CardGame.GameSystem.Manager
                 }
             }
 
-            // Text に反映
+            // Text とゲージの位置に反映
             for (int i = 0; i < costCounts.Length; i++)
             {
+                // Text に反映
                 Text text = costCountsTexts[i];
                 if (text != null)
                 {
                     text.text = costCounts[i].ToString();
+                }
+
+                // ゲージの上端をカード枚数に応じて上方向に伸ばす
+                if (i < costCountsGuages.Count && costCountsGuages[i] != null)
+                {
+                    RectTransform gauge = costCountsGuages[i];
+
+                    // 初期の上端値を保持しておく
+                    float initialTop = 0f;
+
+                    // offsetMax.y をカード枚数に応じて上方向に増加
+                    Vector2 offsetMax = gauge.offsetMax;
+                    offsetMax.y = initialTop + CARD_GAUGE_HEIGHT_PER_CARD * costCounts[i];
+                    gauge.offsetMax = offsetMax;
                 }
             }
         }
